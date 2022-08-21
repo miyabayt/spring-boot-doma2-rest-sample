@@ -1,0 +1,107 @@
+plugins {
+    id "java"
+    id "idea"
+    id "org.springframework.boot" version "${springBootVersion}"
+    id "io.spring.dependency-management" version "${dependencyManagementVersion}"
+    id "org.seasar.doma.compile" version "1.1.0"
+    id "com.google.cloud.tools.jib" version "3.2.1"
+    id "org.eclipse.jkube.kubernetes" version "${jkubeVersion}"
+    id "com.avast.gradle.docker-compose" version "0.16.8"
+    id "com.diffplug.spotless" version "${spotlessVersion}"
+    id "jacoco"
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url "https://repo.spring.io/release" }
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    groovyGradle {
+        target "*.gradle", "**/*.gradle"
+        trimTrailingWhitespace()
+        indentWithSpaces(4)
+        endWithNewline()
+    }
+
+    format "misc", {
+        target "**/*.md", "**/*.yml"
+        trimTrailingWhitespace()
+        indentWithSpaces(2)
+        endWithNewline()
+    }
+
+    lineEndings "UNIX"
+}
+
+sourceCompatibility = "17"
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+[compileJava, compileTestJava]*.options*.compilerArgs = ["-Xlint:all"]
+
+dependencies {
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+    testCompileOnly "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
+
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
+    implementation "org.springframework.boot:spring-boot-starter-mail"
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-json"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-data-redis"
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
+
+    implementation "org.springframework.data:spring-data-commons"
+    implementation "org.seasar.doma.boot:doma-spring-boot-starter:${domaSpringBootVersion}"
+    implementation "org.seasar.doma:doma-core:${domaVersion}"
+    implementation "org.seasar.doma:doma-slf4j:${domaVersion}"
+    annotationProcessor "org.seasar.doma:doma-processor:${domaVersion}"
+
+    implementation "com.fasterxml.jackson.module:jackson-module-parameter-names"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
+
+    implementation 'org.modelmapper:modelmapper:3.1.0'
+    implementation "com.auth0:java-jwt:3.19.2"
+    implementation "org.springdoc:springdoc-openapi-ui:${springdocVersion}"
+    implementation "org.springdoc:springdoc-openapi-security:${springdocVersion}"
+
+    implementation "org.flywaydb:flyway-core"
+    implementation "org.flywaydb:flyway-mysql"
+    runtimeOnly "mysql:mysql-connector-java"
+    // runtimeOnly "org.postgresql:postgresql"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.springframework.security:spring-security-test"
+    testImplementation "com.h2database:h2"
+
+    testImplementation "org.flywaydb.flyway-test-extensions:flyway-spring-test:7.0.0"
+    testImplementation "org.testcontainers:junit-jupiter:1.17.3"
+    testImplementation "org.testcontainers:mysql:1.17.3"
+
+    testImplementation "org.assertj:assertj-core"
+    testImplementation "org.mockito:mockito-core"
+}
+
+tasks.named("test") {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+compileJava.dependsOn "spotlessApply"
+k8sBuild.dependsOn "build"
+k8sResource.dependsOn "k8sBuild"
+k8sApply.dependsOn "k8sResource"

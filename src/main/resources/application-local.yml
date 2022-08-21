@@ -1,0 +1,62 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  messages:
+    cache-duration: -1
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/spring-boot-doma2-rest-sample?allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: passw0rd
+  redis:
+    host: localhost
+    port: 6379
+  flyway:
+    enable: true
+    baseline-on-migrate: true
+  mail:
+    host: 127.0.0.1
+    port: 1025
+    username: test
+    password: test
+doma:
+  # SQLファイルをキャッシュしない
+  sql-file-repository: no_cache
+logging:
+  level:
+    org.springframework: INFO
+    org.springframework.jdbc: INFO
+    com.bigtreetc.sample: DEBUG
+springdoc:
+  swagger-ui:
+    enabled: true
+
+####
+# Spring Cloud AWS
+cloud:
+  aws:
+    region:
+      # メタデータ自動検出を無効化
+      auto: false
+      static: "ap-northeast-1"
+    stack:
+      # CloudFormationのスタック自動検出の無効化
+      auto: false
+    credentials:
+      # ローカル環境ではロールを使わない
+      instanceProfile: false
+      # ロールがあれば使うようにチェインを有効化する
+      useDefaultAwsCredentialsChain: true
+
+####
+# アプリケーションの設定
+application:
+  security:
+    jwt:
+      access-token:
+        signing-key: ${JWT_ACCESS_TOKEN_SIGNING_KEY:rECsevtFUhG4Up8GU3CVZNs9}
+        expired-in: 600000
+      refresh-token:
+        timeout-hours: 2
+  cors:
+    allowed-origins: "*"
