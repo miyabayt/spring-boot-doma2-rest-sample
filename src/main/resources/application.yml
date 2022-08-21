@@ -1,0 +1,75 @@
+# 共通の設定を定義する
+server:
+  forward-headers-strategy: framework
+  port: 8080
+  compression:
+    enabled: true
+spring:
+  profiles:
+    default: local
+  messages:
+    basename: messages,ValidationMessages
+    encoding: UTF-8
+  jackson:
+    # 日付型をISO形式で出力する
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+  servlet:
+    multipart:
+      # アップロードのサイズ制限を設定する
+      max-file-size: 20MB
+      max-request-size: 20MB
+  datasource:
+    platform: mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      auto-commit: false
+      connection-timeout: 30000
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      minimum-idle: 1
+      maximum-pool-size: 4
+  flyway:
+    placeholder-replacement: false
+  output:
+    ansi:
+      enabled: detect
+  mail:
+    protocol: smtp
+    properties:
+      mail:
+        from: from@sample.com
+doma:
+  dialect: mysql
+  # 小文字のスネークケースに変換する（firstName → first_name）
+  naming: SNAKE_LOWER_CASE
+  # SQLファイルをキャッシュする
+  sql-file-repository: greedy_cache
+  # バルクインサート・アップデートのサイズ
+  batch-size: 1000
+management:
+  health:
+    db:
+      enabled: false
+    mail:
+      enabled: false
+springdoc:
+  swagger-ui:
+    enabled: false
+  packagesToScan: com.bigtreetc.sample
+
+####
+# アプリケーションの設定
+application:
+  security:
+    permittedUrls:
+      - "/api/auth/refresh"
+      - "/actuator/health"
+      - "/swagger-resources/**"
+      - "/swagger-ui.html"
+      - "/v2/api-docs"
+      - "/webjars/**"
+  cors:
+    allowed-headers: "Origin,X-Requested-With,Content-Type,Accept,X-XSRF-TOKEN,Authorization"
+    allowed-methods: "POST,GET,PUT,OPTIONS,DELETE"
+    exposed-headers: "Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma,Content-Disposition"
