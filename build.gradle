@@ -6,7 +6,7 @@ plugins {
     id "org.seasar.doma.compile" version "1.1.0"
     id "com.google.cloud.tools.jib" version "3.2.1"
     id "org.eclipse.jkube.kubernetes" version "${jkubeVersion}"
-    id "com.avast.gradle.docker-compose" version "0.16.8"
+    id "com.avast.gradle.docker-compose" version "0.16.9"
     id "com.diffplug.spotless" version "${spotlessVersion}"
     id "jacoco"
 }
