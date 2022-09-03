@@ -1,6 +1,6 @@
 spring:
   messages:
-    basename: messages,ValidationMessages,PropertyNames
+    basename: messages,ValidationMessages
     encoding: UTF-8
   thymeleaf:
     encoding: UTF-8
@@ -18,6 +18,12 @@ spring:
     redis:
       repositories:
         enabled: false
+doma:
+  dialect: mysql
+  # 小文字のスネークケースに変換する（firstName → first_name）
+  naming: SNAKE_LOWER_CASE
+  # バルクインサート・アップデートのサイズ
+  batch-size: 1000
 logging:
   level:
     org.springframework.r2dbc: DEBUG

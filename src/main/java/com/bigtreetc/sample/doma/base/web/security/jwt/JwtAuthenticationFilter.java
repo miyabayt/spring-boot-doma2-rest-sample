@@ -56,7 +56,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     HttpServletResponse response = (HttpServletResponse) res;
 
     if (!this.requiresAuthentication(request, response)) {
-
       chain.doFilter(request, response);
     } else {
       super.doFilter(req, res, chain);

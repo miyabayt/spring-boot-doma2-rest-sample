@@ -62,7 +62,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
       // 権限コードをまとめる
       val permissionCodes =
-          rolePermissions.stream().map(RolePermission::getPermissionCode).collect(toSet());
+          rolePermissions.stream()
+              .filter(RolePermission::getIsEnabled)
+              .map(RolePermission::getPermissionCode)
+              .collect(toSet());
 
       // ロールと権限を両方ともGrantedAuthorityとして渡す
       Set<String> authorities = new HashSet<>();

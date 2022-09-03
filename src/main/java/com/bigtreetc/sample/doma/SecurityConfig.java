@@ -14,10 +14,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,8 +32,6 @@ public class SecurityConfig {
   @Autowired LettuceConnectionFactory lettuceConnectionFactory;
 
   @Autowired AppSecurityConfig securityConfig;
-
-  @Autowired UserDetailsService userDetailsService;
 
   @Bean
   public FilterRegistrationBean<CorsFilter> corsFilter(CorsProperties corsProperties) {
@@ -54,10 +52,9 @@ public class SecurityConfig {
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http, PasswordEncoder passwordEncoder)
-      throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     val permittedUrls = securityConfig.getPermittedUrls().toArray(new String[0]);
-
+    val authenticationManager = http.getSharedObject(AuthenticationManager.class);
     http.csrf()
         .disable()
         .authorizeRequests()
@@ -68,7 +65,7 @@ public class SecurityConfig {
         .anyRequest()
         .authenticated()
         .and()
-        .addFilter(jwtAuthenticationFilter(http, passwordEncoder))
+        .addFilter(jwtAuthenticationFilter(authenticationManager))
         .addFilterAfter(jwtRefreshFilter(), JwtAuthenticationFilter.class)
         .addFilterAfter(jwtVerificationFilter(), JwtRefreshFilter.class)
         .exceptionHandling()
@@ -79,6 +76,12 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     return http.build();
+  }
+
+  @Bean
+  public AuthenticationManager authenticationManager(
+      AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    return authenticationConfiguration.getAuthenticationManager();
   }
 
   @Bean
@@ -111,12 +114,7 @@ public class SecurityConfig {
 
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter(
-      HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
-    val authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-    authenticationManagerBuilder
-        .userDetailsService(userDetailsService)
-        .passwordEncoder(passwordEncoder);
-    val authenticationManager = authenticationManagerBuilder.build();
+      AuthenticationManager authenticationManager) {
     val filter = new JwtAuthenticationFilter(authenticationManager, "/api/auth/login");
     filter.setRepository(jwtRepository());
     return filter;
