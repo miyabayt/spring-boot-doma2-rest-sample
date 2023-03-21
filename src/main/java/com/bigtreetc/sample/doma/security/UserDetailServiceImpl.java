@@ -3,10 +3,10 @@ package com.bigtreetc.sample.doma.security;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.Collectors.toSet;
 
-import com.bigtreetc.sample.doma.domain.dao.system.RolePermissionDao;
-import com.bigtreetc.sample.doma.domain.dao.system.StaffDao;
-import com.bigtreetc.sample.doma.domain.dao.system.StaffRoleDao;
-import com.bigtreetc.sample.doma.domain.model.system.*;
+import com.bigtreetc.sample.doma.domain.dao.RolePermissionDao;
+import com.bigtreetc.sample.doma.domain.dao.StaffDao;
+import com.bigtreetc.sample.doma.domain.dao.StaffRoleDao;
+import com.bigtreetc.sample.doma.domain.model.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

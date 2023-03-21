@@ -1,11 +1,11 @@
 package com.bigtreetc.sample.doma.domain.repository.system;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import com.bigtreetc.sample.doma.BaseTestContainerTest;
 import com.bigtreetc.sample.doma.base.exception.NoDataFoundException;
-import com.bigtreetc.sample.doma.domain.model.system.CodeCategoryCriteria;
+import com.bigtreetc.sample.doma.domain.model.CodeCategoryCriteria;
+import com.bigtreetc.sample.doma.domain.repository.CodeCategoryRepository;
 import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
