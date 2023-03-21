@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS code_categories(
   , version INT(11) unsigned NOT NULL DEFAULT 1 COMMENT '改訂番号'
   , PRIMARY KEY (code_category_id)
   , KEY idx_code_categories_01 (category_code)
-) COMMENT='コード分類';
+) COMMENT='コード分類マスタ';
 
 CREATE TABLE IF NOT EXISTS codes(
   code_id INT(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'コードID'
