@@ -112,4 +112,16 @@ public class JwtRepository {
       log.warn("failed to store refresh token.", e);
     }
   }
+
+  /**
+   * リフレッシュトークンを削除します。
+   *
+   * @param username
+   * @param refreshToken
+   * @return
+   */
+  public boolean deleteRefreshToken(String username, String refreshToken) {
+    val success = redisTemplate.delete(refreshToken);
+    return Boolean.TRUE.equals(success);
+  }
 }
