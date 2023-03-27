@@ -34,7 +34,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "祝日")
+@Tag(name = "祝日マスタ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api/system", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -56,7 +56,7 @@ public class HolidayController extends AbstractRestController {
    * @param request
    * @return
    */
-  @Operation(summary = "祝日登録", description = "祝日を登録します。")
+  @Operation(summary = "祝日マスタ登録", description = "祝日マスタを登録します。")
   @PreAuthorize("hasAuthority('holiday:save')")
   @PostMapping("/holiday")
   public ApiResponse create(@Validated @RequestBody HolidayRequest request, Errors errors) {
@@ -83,7 +83,7 @@ public class HolidayController extends AbstractRestController {
    * @param requests
    * @return
    */
-  @Operation(summary = "祝日一括登録", description = "祝日を一括登録します。")
+  @Operation(summary = "祝日マスタ一括登録", description = "祝日マスタを一括登録します。")
   @PreAuthorize("hasAuthority('holiday:save')")
   @PostMapping(value = "/holidays")
   public ApiResponse createAll(
@@ -113,7 +113,7 @@ public class HolidayController extends AbstractRestController {
    * @return
    */
   @PageableAsQueryParam
-  @Operation(summary = "祝日検索", description = "祝日を検索します。")
+  @Operation(summary = "祝日マスタ検索", description = "祝日マスタを検索します。")
   @PreAuthorize("hasAuthority('holiday:read')")
   @GetMapping("/holidays")
   public ApiResponse search(
@@ -172,7 +172,7 @@ public class HolidayController extends AbstractRestController {
    * @param request
    * @return
    */
-  @Operation(summary = "祝日更新", description = "祝日を更新します。")
+  @Operation(summary = "祝日マスタ更新", description = "祝日マスタを更新します。")
   @PreAuthorize("hasAuthority('holiday:save')")
   @PutMapping("/holiday/{holidayId}")
   public ApiResponse update(
@@ -201,7 +201,7 @@ public class HolidayController extends AbstractRestController {
    * @param requests
    * @return
    */
-  @Operation(summary = "祝日一括更新", description = "祝日を一括更新します。")
+  @Operation(summary = "祝日マスタ一括更新", description = "祝日マスタを一括更新します。")
   @PreAuthorize("hasAuthority('holiday:save')")
   @PutMapping(value = "/holidays")
   public ApiResponse updateAll(
@@ -229,7 +229,7 @@ public class HolidayController extends AbstractRestController {
    * @param holidayId
    * @return
    */
-  @Operation(summary = "祝日削除", description = "祝日を削除します。")
+  @Operation(summary = "祝日マスタ削除", description = "祝日マスタを削除します。")
   @PreAuthorize("hasAuthority('holiday:save')")
   @DeleteMapping("/holiday/{holidayId}")
   public ApiResponse delete(@PathVariable Long holidayId) {
@@ -248,7 +248,7 @@ public class HolidayController extends AbstractRestController {
    * @param requests
    * @return
    */
-  @Operation(summary = "祝日一括削除", description = "祝日を一括削除します。")
+  @Operation(summary = "祝日マスタ一括削除", description = "祝日マスタを一括削除します。")
   @PreAuthorize("hasAuthority('holiday:save')")
   @DeleteMapping(value = "/holidays")
   public ApiResponse deleteAll(
@@ -276,7 +276,7 @@ public class HolidayController extends AbstractRestController {
    * @param filename
    * @return
    */
-  @Operation(summary = "祝日CSV出力", description = "CSVファイルを出力します。")
+  @Operation(summary = "祝日マスタCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('holiday:read')")
   @GetMapping("/holidays/export/{filename:.+\\.csv}")
   public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {

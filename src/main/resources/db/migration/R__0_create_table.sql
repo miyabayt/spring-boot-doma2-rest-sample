@@ -203,4 +203,4 @@ CREATE TABLE IF NOT EXISTS holidays(
   , version INT(11) unsigned NOT NULL DEFAULT 1 COMMENT '改訂番号'
   , PRIMARY KEY (holiday_id)
   , KEY idx_holidays_01 (holiday_name)
-) COMMENT='祝日';
+) COMMENT='祝日マスタ';

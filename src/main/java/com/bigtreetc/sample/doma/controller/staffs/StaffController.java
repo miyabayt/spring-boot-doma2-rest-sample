@@ -36,7 +36,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "担当者")
+@Tag(name = "担当者マスタ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api/system", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,7 +60,7 @@ public class StaffController extends AbstractRestController {
    * @param request
    * @return
    */
-  @Operation(summary = "担当者登録", description = "担当者を登録します。")
+  @Operation(summary = "担当者マスタ登録", description = "担当者マスタを登録します。")
   @PreAuthorize("hasAuthority('staff:save')")
   @PostMapping("/staff")
   public ApiResponse create(@Validated @RequestBody StaffRequest request, Errors errors) {
@@ -91,7 +91,7 @@ public class StaffController extends AbstractRestController {
    * @param requests
    * @return
    */
-  @Operation(summary = "担当者一括登録", description = "担当者を一括登録します。")
+  @Operation(summary = "担当者マスタ一括登録", description = "担当者マスタを一括登録します。")
   @PreAuthorize("hasAuthority('staff:save')")
   @PostMapping(value = "/staffs")
   public ApiResponse createAll(
@@ -121,7 +121,7 @@ public class StaffController extends AbstractRestController {
    * @return
    */
   @PageableAsQueryParam
-  @Operation(summary = "担当者検索", description = "担当者を検索します。")
+  @Operation(summary = "担当者マスタ検索", description = "担当者マスタを検索します。")
   @PreAuthorize("hasAuthority('staff:read')")
   @GetMapping("/staffs")
   public ApiResponse search(
@@ -180,7 +180,7 @@ public class StaffController extends AbstractRestController {
    * @param request
    * @return
    */
-  @Operation(summary = "担当者更新", description = "担当者を更新します。")
+  @Operation(summary = "担当者マスタ更新", description = "担当者マスタを更新します。")
   @PreAuthorize("hasAuthority('staff:save')")
   @PutMapping("/staff/{staffId}")
   public ApiResponse update(
@@ -214,7 +214,7 @@ public class StaffController extends AbstractRestController {
    * @param requests
    * @return
    */
-  @Operation(summary = "担当者一括更新", description = "担当者を一括更新します。")
+  @Operation(summary = "担当者マスタ一括更新", description = "担当者マスタを一括更新します。")
   @PreAuthorize("hasAuthority('staff:save')")
   @PutMapping(value = "/staffs")
   public ApiResponse update(
@@ -242,7 +242,7 @@ public class StaffController extends AbstractRestController {
    * @param staffId
    * @return
    */
-  @Operation(summary = "担当者削除", description = "担当者を削除します。")
+  @Operation(summary = "担当者マスタ削除", description = "担当者マスタを削除します。")
   @PreAuthorize("hasAuthority('staff:save')")
   @DeleteMapping("/staff/{staffId}")
   public ApiResponse delete(@PathVariable Long staffId) {
@@ -261,7 +261,7 @@ public class StaffController extends AbstractRestController {
    * @param requests
    * @return
    */
-  @Operation(summary = "担当者一括削除", description = "担当者を一括削除します。")
+  @Operation(summary = "担当者マスタ一括削除", description = "担当者マスタを一括削除します。")
   @PreAuthorize("hasAuthority('staff:save')")
   @DeleteMapping(value = "/staffs")
   public ApiResponse deleteAll(
@@ -289,7 +289,7 @@ public class StaffController extends AbstractRestController {
    * @param filename
    * @return
    */
-  @Operation(summary = "担当者CSV出力", description = "CSVファイルを出力します。")
+  @Operation(summary = "担当者マスタCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('staff:read')")
   @GetMapping("/staffs/export/{filename:.+\\.csv}")
   public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {

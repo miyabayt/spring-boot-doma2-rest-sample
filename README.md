@@ -11,8 +11,29 @@
 
 ## Docker
 
+### Build
+
 ```bash
+$ # start mysql/redis/mock smtp server
 $ ./gradlew composeUp
+
+$ # run spring boot app
+$ ./gradlew bootRun
+
+$ # ログイン
+$ curl -s -L -X POST 'http://localhost:8080/api/auth/login' \
+    -H 'Content-Type: application/json' \
+    --data-raw '{
+    "username": "test@example.com",
+    "password": "passw0rd" }' | jq .
+{
+  "data": {
+    "accessToken": "<access-token>",
+    "refreshToken": "<refresh-token>"
+  },
+  "success": true,
+  "message": "正常終了"
+}
 ```
 
 ## minikube
