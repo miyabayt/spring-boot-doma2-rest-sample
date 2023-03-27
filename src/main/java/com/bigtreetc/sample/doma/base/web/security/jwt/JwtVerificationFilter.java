@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -36,20 +37,17 @@ public class JwtVerificationFilter extends GenericFilterBean {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  private String signingKey = "CCp7QvauLvIvweVt8XblRNhgkoTXBR";
-
   private final Algorithm algorithm;
 
-  private RequestMatcher requiresAuthenticationRequestMatcher;
+  private RequestMatcher requiresAuthenticationRequestMatcher = AnyRequestMatcher.INSTANCE;
 
   /**
    * コンストラクタ
    *
-   * @param pathPattern
+   * @param signingKey
    */
-  public JwtVerificationFilter(String pathPattern) {
+  public JwtVerificationFilter(String signingKey) {
     this.algorithm = Algorithm.HMAC512(signingKey);
-    this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(pathPattern));
   }
 
   /**
@@ -59,7 +57,6 @@ public class JwtVerificationFilter extends GenericFilterBean {
    * @param pathPattern
    */
   public JwtVerificationFilter(String signingKey, String pathPattern) {
-    this.signingKey = signingKey;
     this.algorithm = Algorithm.HMAC512(signingKey);
     this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(pathPattern));
   }
@@ -104,7 +101,6 @@ public class JwtVerificationFilter extends GenericFilterBean {
       response.setHeader(
           HttpHeaders.CONTENT_TYPE,
           new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8).toString());
-      ;
       response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
       try (val writer = response.getWriter()) {

@@ -2,17 +2,12 @@ package com.bigtreetc.sample.doma.base.web.security.jwt;
 
 import static com.bigtreetc.sample.doma.base.web.BaseWebConst.UNAUTHORIZED_ERROR;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.bigtreetc.sample.doma.base.util.MessageUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ErrorApiResponseImpl;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.SimpleApiResponseImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -27,7 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -38,19 +33,9 @@ public class JwtRefreshFilter extends GenericFilterBean {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  private RequestMatcher requiresAuthenticationRequestMatcher = AnyRequestMatcher.INSTANCE;
+
   private JwtRepository repository;
-
-  private RequestMatcher requiresAuthenticationRequestMatcher;
-
-  /**
-   * コンストラクタ
-   *
-   * @param pathPattern
-   */
-  public JwtRefreshFilter(String pathPattern) {
-    super();
-    this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(pathPattern, "POST"));
-  }
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -73,9 +58,9 @@ public class JwtRefreshFilter extends GenericFilterBean {
 
       val accessToken = token.getAccessToken();
       val refreshToken = token.getRefreshToken();
-      val jwt = parseToken(accessToken);
-      val username = getUsername(jwt);
-      val authorities = getAuthorities(jwt);
+
+      val username = repository.getClaimAsString(accessToken, JwtConst.USERNAME);
+      val authorities = repository.getClaimAsList(accessToken, JwtConst.ROLES, String.class);
 
       val valid = repository.verifyRefreshToken(username, refreshToken);
       if (!valid) {
@@ -109,47 +94,6 @@ public class JwtRefreshFilter extends GenericFilterBean {
     try (val writer = response.getWriter()) {
       OBJECT_MAPPER.writeValue(writer, resource);
     }
-  }
-
-  /**
-   * トークンからユーザ名を取り出します。
-   *
-   * @param accessToken
-   * @return
-   */
-  private DecodedJWT parseToken(String accessToken) {
-    DecodedJWT jwt = null;
-    try {
-      jwt = JWT.decode(accessToken);
-    } catch (Exception e) {
-      throw new JWTDecodeException("アクセストークンが不正です。");
-    }
-    return jwt;
-  }
-
-  /**
-   * ユーザ名を取り出します。
-   *
-   * @param jwt
-   * @return
-   */
-  private String getUsername(DecodedJWT jwt) {
-    val username = jwt.getClaim(JwtConst.USERNAME).asString();
-    if (username == null || "".equals(username)) {
-      String msg = String.format("username=%s", username);
-      throw new JWTVerificationException(msg);
-    }
-    return username;
-  }
-
-  /**
-   * 権限情報を取り出します。
-   *
-   * @param jwt
-   * @return
-   */
-  private List<String> getAuthorities(DecodedJWT jwt) {
-    return jwt.getClaim(JwtConst.ROLES).asList(String.class);
   }
 
   protected boolean requiresAuthentication(

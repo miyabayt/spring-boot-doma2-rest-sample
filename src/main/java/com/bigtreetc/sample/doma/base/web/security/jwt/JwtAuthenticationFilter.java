@@ -19,14 +19,12 @@ import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Getter
 @Setter
@@ -36,18 +34,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private JwtRepository repository;
-
-  /**
-   * コンストラクタ
-   *
-   * @param authenticationManager
-   * @param pathPattern
-   */
-  public JwtAuthenticationFilter(AuthenticationManager authenticationManager, String pathPattern) {
-    super();
-    this.setAuthenticationManager(authenticationManager);
-    this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(pathPattern, "POST"));
-  }
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)

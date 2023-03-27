@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,7 +55,6 @@ public class AuthController {
    * @param request
    * @return
    */
-  @PreAuthorize("isAuthenticated()")
   @PostMapping("/logout")
   public ApiResponse logout(@RequestBody RefreshTokenRequest request) {
     val accessToken = request.getAccessToken();

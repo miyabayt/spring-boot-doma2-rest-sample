@@ -5,6 +5,7 @@ import com.bigtreetc.sample.doma.base.web.security.CorsProperties;
 import com.bigtreetc.sample.doma.base.web.security.JsonAccessDeniedHandler;
 import com.bigtreetc.sample.doma.base.web.security.jwt.*;
 import com.bigtreetc.sample.doma.base.web.security.jwt.JwtAuthenticationFilter;
+import java.util.ArrayList;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -21,6 +22,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -58,10 +63,8 @@ public class SecurityConfig {
     http.csrf()
         .disable()
         .authorizeRequests()
-        // エラー画面は認証をかけない
         .antMatchers(permittedUrls)
         .permitAll()
-        // エラー画面以外は、認証をかける
         .anyRequest()
         .authenticated()
         .and()
@@ -115,15 +118,20 @@ public class SecurityConfig {
   @Bean
   public JwtAuthenticationFilter jwtAuthenticationFilter(
       AuthenticationManager authenticationManager) {
-    val filter = new JwtAuthenticationFilter(authenticationManager, "/api/auth/login");
+    val matcher = new AntPathRequestMatcher("/api/auth/login", "POST");
+    val filter = new JwtAuthenticationFilter();
+    filter.setAuthenticationManager(authenticationManager);
+    filter.setRequiresAuthenticationRequestMatcher(matcher);
     filter.setRepository(jwtRepository());
     return filter;
   }
 
   @Bean
   public JwtRefreshFilter jwtRefreshFilter() {
-    val filter = new JwtRefreshFilter("/api/auth/refresh");
+    val matcher = new AntPathRequestMatcher("/api/auth/refresh", "POST");
+    val filter = new JwtRefreshFilter();
     filter.setRepository(jwtRepository());
+    filter.setRequiresAuthenticationRequestMatcher(matcher);
     return filter;
   }
 
@@ -131,6 +139,18 @@ public class SecurityConfig {
   public JwtVerificationFilter jwtVerificationFilter() {
     val jwtConfig = securityConfig.getJwt();
     val signingKey = jwtConfig.getAccessToken().getSigningKey();
-    return new JwtVerificationFilter(signingKey, "/**");
+    val matcher = new NegatedRequestMatcher(permittedUrlsMatcher());
+    val filter = new JwtVerificationFilter(signingKey);
+    filter.setRequiresAuthenticationRequestMatcher(matcher);
+    return filter;
+  }
+
+  private RequestMatcher permittedUrlsMatcher() {
+    val permittedUrls = securityConfig.getPermittedUrls().toArray(new String[0]);
+    val tempMatcherList = new ArrayList<RequestMatcher>();
+    for (val url : permittedUrls) {
+      tempMatcherList.add(new AntPathRequestMatcher(url));
+    }
+    return new OrRequestMatcher(tempMatcherList);
   }
 }

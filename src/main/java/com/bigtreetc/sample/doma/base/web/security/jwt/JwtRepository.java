@@ -2,6 +2,9 @@ package com.bigtreetc.sample.doma.base.web.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -57,7 +60,14 @@ public class JwtRepository {
    */
   public String createRefreshToken(String username) {
     val refreshToken = RandomStringUtils.randomAlphanumeric(256);
-    storeRefreshToken(refreshToken, username);
+    redisTemplate.multi();
+    redisTemplate.opsForValue().set(refreshToken, username);
+    redisTemplate.expire(refreshToken, refreshTokenTimeoutHours, TimeUnit.HOURS);
+
+    if (log.isDebugEnabled()) {
+      log.debug("refresh token has stored. [username={}, refreshToken={}]", username, refreshToken);
+    }
+
     return refreshToken;
   }
 
@@ -68,6 +78,7 @@ public class JwtRepository {
    * @param refreshToken
    * @return
    */
+  @Transactional(readOnly = true)
   public boolean verifyRefreshToken(String username, String refreshToken) {
     val value = redisTemplate.opsForValue().get(refreshToken);
     if (!Objects.equals(username, value)) {
@@ -91,37 +102,80 @@ public class JwtRepository {
     redisTemplate.delete(refreshToken);
     redisTemplate.opsForValue().set(newRefreshToken, username);
     redisTemplate.expire(newRefreshToken, refreshTokenTimeoutHours, TimeUnit.HOURS);
-    redisTemplate.exec();
+
+    if (log.isDebugEnabled()) {
+      log.debug(
+          "refresh token has renewed. [username={}, refreshToken={}]", username, newRefreshToken);
+    }
+
     return newRefreshToken;
   }
 
   /**
-   * リフレッシュトークンを永続化します。
+   * クレームを取り出します。
    *
-   * @param key
-   * @param username
+   * @param accessToken
+   * @param claimName
+   * @return
    */
-  protected void storeRefreshToken(String key, String username) {
-    try {
-      redisTemplate.multi();
-      redisTemplate.opsForValue().set(key, username);
-      redisTemplate.expire(key, refreshTokenTimeoutHours, TimeUnit.HOURS);
-      redisTemplate.exec();
-      log.info("refresh token has stored. [name={}, key={}]", username, key);
-    } catch (Throwable e) {
-      log.warn("failed to store refresh token.", e);
+  public String getClaimAsString(String accessToken, String claimName) {
+    val jwt = parseToken(accessToken);
+    val claim = jwt.getClaim(claimName).asString();
+    if (claim == null || claim.isEmpty()) {
+      throw new JWTVerificationException("could not get claim. [name=" + claimName + "]");
     }
+    return claim;
+  }
+
+  /**
+   * クレームを取り出します。
+   *
+   * @param accessToken
+   * @param claimName
+   * @return
+   */
+  public <T> List<T> getClaimAsList(String accessToken, String claimName, Class<T> clazz) {
+    val jwt = parseToken(accessToken);
+    val claim = jwt.getClaim(claimName).asList(clazz);
+    if (claim == null || claim.isEmpty()) {
+      throw new JWTVerificationException("could not get claim. [name=" + claimName + "]");
+    }
+    return claim;
   }
 
   /**
    * リフレッシュトークンを削除します。
    *
-   * @param username
+   * @param accessToken
    * @param refreshToken
    * @return
    */
-  public boolean deleteRefreshToken(String username, String refreshToken) {
-    val success = redisTemplate.delete(refreshToken);
-    return Boolean.TRUE.equals(success);
+  public boolean deleteRefreshToken(String accessToken, String refreshToken) {
+    redisTemplate.multi();
+
+    val expectedUsername = redisTemplate.opsForValue().get(refreshToken);
+    val actualUsername = getClaimAsString(accessToken, JwtConst.USERNAME);
+
+    if (Objects.equals(expectedUsername, actualUsername)) {
+      val success = redisTemplate.delete(refreshToken);
+      return Boolean.TRUE.equals(success);
+    }
+    return false;
+  }
+
+  /**
+   * アクセストークンをデコードします。
+   *
+   * @param accessToken
+   * @return
+   */
+  private DecodedJWT parseToken(String accessToken) {
+    DecodedJWT jwt = null;
+    try {
+      jwt = JWT.decode(accessToken);
+    } catch (Exception e) {
+      throw new JWTDecodeException("アクセストークンが不正です。");
+    }
+    return jwt;
   }
 }
