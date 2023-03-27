@@ -124,7 +124,7 @@ public class StaffController extends AbstractRestController {
   @Operation(summary = "担当者検索", description = "担当者を検索します。")
   @PreAuthorize("hasAuthority('staff:read')")
   @GetMapping("/staffs")
-  public ApiResponse findAll(
+  public ApiResponse search(
       @ModelAttribute SearchStaffRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
     val criteria = modelMapper.map(request, StaffCriteria.class);
@@ -139,12 +139,28 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
+   * 担当者を検索します。（POST版）
+   *
+   * @param request
+   * @param pageable
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "担当者マスタ検索", description = "担当者マスタを検索します。")
+  @PreAuthorize("hasAuthority('staff:read')")
+  @PostMapping("/staffs/search")
+  public ApiResponse searchByPost(
+      @RequestBody SearchStaffRequest request, @Parameter(hidden = true) Pageable pageable) {
+    return search(request, pageable);
+  }
+
+  /**
    * 担当者を取得します。
    *
    * @param staffId
    * @return
    */
-  @Operation(summary = "担当者取得", description = "担当者を取得します。")
+  @Operation(summary = "担当者マスタ取得", description = "担当者マスタを取得します。")
   @PreAuthorize("hasAuthority('staff:read')")
   @GetMapping("/staff/{staffId}")
   public ApiResponse findOne(@PathVariable Long staffId) {

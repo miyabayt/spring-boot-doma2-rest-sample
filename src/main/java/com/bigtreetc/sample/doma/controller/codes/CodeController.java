@@ -116,7 +116,7 @@ public class CodeController extends AbstractRestController {
   @Operation(summary = "コード検索", description = "コードを検索します。")
   @PreAuthorize("hasAuthority('code:read')")
   @GetMapping("/codes")
-  public ApiResponse findAll(
+  public ApiResponse search(
       @ModelAttribute SearchCodeRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
     val criteria = modelMapper.map(request, CodeCriteria.class);
@@ -128,6 +128,22 @@ public class CodeController extends AbstractRestController {
     response.success(data);
 
     return response;
+  }
+
+  /**
+   * コードを検索します。（POST版）
+   *
+   * @param request
+   * @param pageable
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "コード検索", description = "コードを検索します。")
+  @PreAuthorize("hasAuthority('code:read')")
+  @PostMapping("/codes/search")
+  public ApiResponse searchByPost(
+      @RequestBody SearchCodeRequest request, @Parameter(hidden = true) Pageable pageable) {
+    return search(request, pageable);
   }
 
   /**

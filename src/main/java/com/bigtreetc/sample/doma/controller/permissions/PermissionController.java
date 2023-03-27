@@ -126,7 +126,7 @@ public class PermissionController extends AbstractRestController {
   @Operation(summary = "権限検索", description = "権限を検索します。")
   @PreAuthorize("hasAuthority('permission:read')")
   @GetMapping(value = "/permissions")
-  public ApiResponse findAll(
+  public ApiResponse search(
       @ModelAttribute SearchPermissionRequest request,
       @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
@@ -139,6 +139,21 @@ public class PermissionController extends AbstractRestController {
     response.success(data);
 
     return response;
+  }
+
+  /**
+   * 権限を検索します。（POST版）
+   *
+   * @param request
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "権限検索", description = "権限を検索します。")
+  @PreAuthorize("hasAuthority('permission:read')")
+  @PostMapping(value = "/permissions/search")
+  public ApiResponse searchByPost(
+      @RequestBody SearchPermissionRequest request, @Parameter(hidden = true) Pageable pageable) {
+    return search(request, pageable);
   }
 
   /**

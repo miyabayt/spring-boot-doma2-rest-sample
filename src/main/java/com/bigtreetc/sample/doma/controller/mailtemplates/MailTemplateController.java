@@ -116,7 +116,7 @@ public class MailTemplateController extends AbstractRestController {
   @Operation(summary = "メールテンプレート検索", description = "メールテンプレートを検索します。")
   @PreAuthorize("hasAuthority('mailTemplates:read')")
   @GetMapping("/mailTemplates")
-  public ApiResponse findAll(
+  public ApiResponse search(
       @ModelAttribute SearchMailTemplateRequest request,
       @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
@@ -129,6 +129,22 @@ public class MailTemplateController extends AbstractRestController {
     response.success(data);
 
     return response;
+  }
+
+  /**
+   * メールテンプレートを検索します。（POST版）
+   *
+   * @param request
+   * @param pageable
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "メールテンプレート検索", description = "メールテンプレートを検索します。")
+  @PreAuthorize("hasAuthority('mailTemplates:read')")
+  @PostMapping("/mailTemplates/search")
+  public ApiResponse searchByPost(
+      @RequestBody SearchMailTemplateRequest request, @Parameter(hidden = true) Pageable pageable) {
+    return search(request, pageable);
   }
 
   /**

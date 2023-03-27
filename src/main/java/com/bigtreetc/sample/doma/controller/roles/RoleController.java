@@ -128,7 +128,7 @@ public class RoleController extends AbstractRestController {
   @Operation(summary = "ロール検索", description = "ロールを検索します。")
   @PreAuthorize("hasAuthority('role:read')")
   @GetMapping("/roles")
-  public ApiResponse findAll(
+  public ApiResponse search(
       @ModelAttribute SearchRoleRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
     val criteria = modelMapper.map(request, RoleCriteria.class);
@@ -140,6 +140,22 @@ public class RoleController extends AbstractRestController {
     response.success(data);
 
     return response;
+  }
+
+  /**
+   * ロールを検索します。（POST版）
+   *
+   * @param request
+   * @param pageable
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "ロール検索", description = "ロールを検索します。")
+  @PreAuthorize("hasAuthority('role:read')")
+  @PostMapping("/roles/search")
+  public ApiResponse searchByPost(
+      @RequestBody SearchRoleRequest request, @Parameter(hidden = true) Pageable pageable) {
+    return search(request, pageable);
   }
 
   /**

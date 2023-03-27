@@ -116,7 +116,7 @@ public class HolidayController extends AbstractRestController {
   @Operation(summary = "祝日検索", description = "祝日を検索します。")
   @PreAuthorize("hasAuthority('holiday:read')")
   @GetMapping("/holidays")
-  public ApiResponse findAll(
+  public ApiResponse search(
       @ModelAttribute SearchHolidayRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
     val criteria = modelMapper.map(request, HolidayCriteria.class);
@@ -131,12 +131,28 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
+   * 祝日を検索します。（POST版）
+   *
+   * @param request
+   * @param pageable
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "祝日マスタ検索", description = "祝日マスタを検索します。")
+  @PreAuthorize("hasAuthority('holiday:read')")
+  @PostMapping("/holidays/search")
+  public ApiResponse searchByPost(
+      @RequestBody SearchHolidayRequest request, @Parameter(hidden = true) Pageable pageable) {
+    return search(request, pageable);
+  }
+
+  /**
    * 祝日を取得します。
    *
    * @param holidayId
    * @return
    */
-  @Operation(summary = "祝日取得", description = "祝日を取得します。")
+  @Operation(summary = "祝日マスタ取得", description = "祝日マスタを取得します。")
   @PreAuthorize("hasAuthority('holiday:read')")
   @GetMapping("/holiday/{holidayId}")
   public ApiResponse findOne(@PathVariable Long holidayId) {

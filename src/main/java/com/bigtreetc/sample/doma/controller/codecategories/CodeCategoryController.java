@@ -118,7 +118,7 @@ public class CodeCategoryController extends AbstractRestController {
   @Operation(summary = "コード分類マスタ検索", description = "コード分類マスタを検索します。")
   @PreAuthorize("hasAuthority('codeCategory:read')")
   @GetMapping("/codeCategories")
-  public ApiResponse findAll(
+  public ApiResponse search(
       @ModelAttribute SearchCodeCategoryRequest request,
       @Parameter(hidden = true) Pageable pageable) {
 
@@ -132,6 +132,22 @@ public class CodeCategoryController extends AbstractRestController {
     response.success(data);
 
     return response;
+  }
+
+  /**
+   * コード分類マスタを検索します。（POST版）
+   *
+   * @param request
+   * @param pageable
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "コード分類マスタ検索", description = "コード分類マスタを検索します。")
+  @PreAuthorize("hasAuthority('codeCategory:read')")
+  @PostMapping("/codeCategories/search")
+  public ApiResponse searchByPost(
+      @RequestBody SearchCodeCategoryRequest request, @Parameter(hidden = true) Pageable pageable) {
+    return search(request, pageable);
   }
 
   /**

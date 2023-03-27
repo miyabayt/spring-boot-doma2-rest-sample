@@ -124,7 +124,7 @@ public class UserController extends AbstractRestController {
   @Operation(summary = "ユーザ検索", description = "ユーザを検索します。")
   @PreAuthorize("hasAuthority('user:read')")
   @GetMapping("/users")
-  public ApiResponse findAll(
+  public ApiResponse search(
       @ModelAttribute SearchUserRequest request, @Parameter(hidden = true) Pageable pageable) {
     // 入力値からDTOを作成する
     val criteria = modelMapper.map(request, UserCriteria.class);
@@ -136,6 +136,22 @@ public class UserController extends AbstractRestController {
     response.success(data);
 
     return response;
+  }
+
+  /**
+   * ユーザを検索します。（POST版）
+   *
+   * @param request
+   * @param pageable
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "ユーザ検索", description = "ユーザを検索します。")
+  @PreAuthorize("hasAuthority('user:read')")
+  @PostMapping("/users/search")
+  public ApiResponse searchByPost(
+      @RequestBody SearchUserRequest request, @Parameter(hidden = true) Pageable pageable) {
+    return search(request, pageable);
   }
 
   /**
