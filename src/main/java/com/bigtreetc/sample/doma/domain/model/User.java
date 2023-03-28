@@ -2,9 +2,9 @@ package com.bigtreetc.sample.doma.domain.model;
 
 import com.bigtreetc.sample.doma.base.domain.model.BaseEntityImpl;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 import org.seasar.doma.*;

@@ -6,9 +6,10 @@ spring:
     url: jdbc:mysql://mysql:3306/spring-boot-doma2-rest-sample?allowPublicKeyRetrieval=true&useSSL=false&useUnicode=true&characterEncoding=UTF-8
     username: root
     password: passw0rd
-  redis:
-    host: redis
-    port: 6379
+  data:
+    redis:
+      host: redis
+      port: 6379
   flyway:
     enable: true
     baseline-on-migrate: true

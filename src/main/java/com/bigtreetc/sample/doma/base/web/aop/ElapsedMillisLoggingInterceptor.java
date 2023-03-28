@@ -3,8 +3,8 @@ package com.bigtreetc.sample.doma.base.web.aop;
 import static com.bigtreetc.sample.doma.base.util.ValidateUtils.isEmpty;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -65,7 +65,7 @@ public class ElapsedMillisLoggingInterceptor implements HandlerInterceptor {
   private String getRequestURI(HttpServletRequest request) {
     String requestURI = null;
     try {
-      requestURI = (String) request.getAttribute("javax.servlet.forward.request_uri");
+      requestURI = (String) request.getAttribute("jakarta.servlet.forward.request_uri");
     } catch (Exception e) {
       // ignore
     }

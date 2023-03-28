@@ -17,7 +17,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -32,9 +32,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-@EnableGlobalMethodSecurity(
-    prePostEnabled = true,
-    securedEnabled = true) // アノテーションでロール、権限チェックを行うために定義する
+@EnableMethodSecurity
 @Configuration
 @EnableConfigurationProperties({CorsProperties.class, AppSecurityConfig.class})
 @EnableWebSecurity
@@ -68,8 +66,8 @@ public class SecurityConfig {
     val authenticationManager = http.getSharedObject(AuthenticationManager.class);
     http.csrf()
         .disable()
-        .authorizeRequests()
-        .antMatchers(permittedUrls)
+        .authorizeHttpRequests()
+        .requestMatchers(permittedUrls)
         .permitAll()
         .anyRequest()
         .authenticated()

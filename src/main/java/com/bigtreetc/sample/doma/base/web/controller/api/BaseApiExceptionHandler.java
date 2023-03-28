@@ -16,7 +16,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -224,15 +226,19 @@ public class BaseApiExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected ResponseEntity<Object> handleExceptionInternal(
-      Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+      Exception ex,
+      @Nullable Object body,
+      HttpHeaders headers,
+      HttpStatusCode statusCode,
+      WebRequest request) {
     log.error("unexpected error has occurred.", ex);
 
     val locale = request.getLocale();
-    val message = MessageUtils.getMessage(UNEXPECTED_ERROR, null, "unexpected error", locale);
+    val message = MessageUtils.getMessage(UNEXPECTED_ERROR, locale);
 
     val response = new ErrorApiResponseImpl();
     response.setMessage(message);
 
-    return new ResponseEntity<>(response, headers, status);
+    return new ResponseEntity<>(response, headers, statusCode);
   }
 }

@@ -1,9 +1,9 @@
 package com.bigtreetc.sample.doma.base.domain.validator.annotation;
 
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 /** 入力チェック（郵便番号） */

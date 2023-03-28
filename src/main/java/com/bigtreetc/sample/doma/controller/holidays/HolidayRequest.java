@@ -1,7 +1,7 @@
 package com.bigtreetc.sample.doma.controller.holidays;
 
+import jakarta.validation.constraints.NotEmpty;
 import java.time.LocalDate;
-import javax.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
