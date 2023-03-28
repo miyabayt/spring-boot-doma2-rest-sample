@@ -19,8 +19,10 @@ spring:
       # アップロードのサイズ制限を設定する
       max-file-size: 20MB
       max-request-size: 20MB
+  sql:
+    init:
+      platform: mysql
   datasource:
-    platform: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       auto-commit: false

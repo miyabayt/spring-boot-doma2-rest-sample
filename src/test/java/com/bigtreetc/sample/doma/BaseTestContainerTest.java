@@ -5,20 +5,22 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 public class BaseTestContainerTest {
 
-  @Container
   private static final MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>("mysql:8");
 
-  @Container
   private static final GenericContainer<?> MAILHOG_CONTAINER =
       new GenericContainer<>("mailhog/mailhog")
           .withExposedPorts(1025, 8025)
           .waitingFor(Wait.forHttp("/").forPort(8025));
+
+  static {
+    MYSQL_CONTAINER.start();
+    MAILHOG_CONTAINER.start();
+  }
 
   @DynamicPropertySource
   static void overrideProperties(DynamicPropertyRegistry registry) {

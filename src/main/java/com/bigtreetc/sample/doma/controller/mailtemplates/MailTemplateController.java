@@ -114,7 +114,7 @@ public class MailTemplateController extends AbstractRestController {
    */
   @PageableAsQueryParam
   @Operation(summary = "メールテンプレート検索", description = "メールテンプレートを検索します。")
-  @PreAuthorize("hasAuthority('mailTemplates:read')")
+  @PreAuthorize("hasAuthority('mailTemplate:read')")
   @GetMapping("/mailTemplates")
   public ApiResponse search(
       @ModelAttribute SearchMailTemplateRequest request,
@@ -140,7 +140,7 @@ public class MailTemplateController extends AbstractRestController {
    */
   @PageableAsQueryParam
   @Operation(summary = "メールテンプレート検索", description = "メールテンプレートを検索します。")
-  @PreAuthorize("hasAuthority('mailTemplates:read')")
+  @PreAuthorize("hasAuthority('mailTemplate:read')")
   @PostMapping("/mailTemplates/search")
   public ApiResponse searchByPost(
       @RequestBody SearchMailTemplateRequest request, @Parameter(hidden = true) Pageable pageable) {
@@ -150,15 +150,15 @@ public class MailTemplateController extends AbstractRestController {
   /**
    * メールテンプレートを取得します。
    *
-   * @param mailTemplatesId
+   * @param mailTemplateId
    * @return
    */
   @Operation(summary = "メールテンプレート取得", description = "メールテンプレートを取得します。")
-  @PreAuthorize("hasAuthority('mailTemplates:read')")
-  @GetMapping("/mailTemplate/{mailTemplatesId}")
-  public ApiResponse findOne(@PathVariable Long mailTemplatesId) {
+  @PreAuthorize("hasAuthority('mailTemplate:read')")
+  @GetMapping("/mailTemplate/{mailTemplateId}")
+  public ApiResponse findOne(@PathVariable Long mailTemplateId) {
     // 1件取得する
-    val data = mailTemplatesService.findById(mailTemplatesId);
+    val data = mailTemplatesService.findById(mailTemplateId);
 
     val response = new SimpleApiResponseImpl();
     response.success(data);
@@ -169,15 +169,15 @@ public class MailTemplateController extends AbstractRestController {
   /**
    * メールテンプレートを更新します。
    *
-   * @param mailTemplatesId
+   * @param mailTemplateId
    * @param request
    * @return
    */
   @Operation(summary = "メールテンプレート更新", description = "メールテンプレートを更新します。")
   @PreAuthorize("hasAuthority('mailTemplates:save')")
-  @PutMapping("/mailTemplate/{mailTemplatesId}")
+  @PutMapping("/mailTemplate/{mailTemplateId}")
   public ApiResponse update(
-      @PathVariable Long mailTemplatesId,
+      @PathVariable Long mailTemplateId,
       @Validated @RequestBody MailTemplateRequest request,
       Errors errors) {
     // 入力エラーがある場合
@@ -189,7 +189,7 @@ public class MailTemplateController extends AbstractRestController {
     val mailTemplates = modelMapper.map(request, MailTemplate.class);
 
     // 1件更新する
-    mailTemplates.setId(mailTemplatesId);
+    mailTemplates.setId(mailTemplateId);
     val data = mailTemplatesService.update(mailTemplates);
 
     val response = new SimpleApiResponseImpl();
@@ -230,15 +230,15 @@ public class MailTemplateController extends AbstractRestController {
   /**
    * メールテンプレートを削除します。
    *
-   * @param mailTemplatesId
+   * @param mailTemplateId
    * @return
    */
   @Operation(summary = "メールテンプレート削除", description = "メールテンプレートを削除します。")
   @PreAuthorize("hasAuthority('mailTemplates:save')")
-  @DeleteMapping("/mailTemplate/{mailTemplatesId}")
-  public ApiResponse delete(@PathVariable Long mailTemplatesId) {
+  @DeleteMapping("/mailTemplate/{mailTemplateId}")
+  public ApiResponse delete(@PathVariable Long mailTemplateId) {
     // 1件取得する
-    val data = mailTemplatesService.delete(mailTemplatesId);
+    val data = mailTemplatesService.delete(mailTemplateId);
 
     val response = new SimpleApiResponseImpl();
     response.success(data);
@@ -282,7 +282,7 @@ public class MailTemplateController extends AbstractRestController {
    * @return
    */
   @Operation(summary = "メールテンプレートCSV出力", description = "CSVファイルを出力します。")
-  @PreAuthorize("hasAuthority('mailTemplates:read')")
+  @PreAuthorize("hasAuthority('mailTemplate:read')")
   @GetMapping("/mailTemplates/export/{filename:.+\\.csv}")
   public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {
     val mailTemplates =
