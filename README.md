@@ -36,6 +36,23 @@ $ curl -s -L -X POST 'http://localhost:8080/api/auth/login' \
 }
 ```
 
+## native image
+
+```bash
+$ # required to install
+$ xcode-select --install
+
+$ # install graalvm & switch jvm
+$ sdk install java 22.3.1.r17-grl
+$ sdk use java 22.3.1.r17-grl
+
+$ # build native image
+$ ./gradlew nativeCompile
+
+$ # run native image
+$ ./build/native/nativeCompile/spring-boot-doma2-rest-sample
+```
+
 ## minikube
 
 ### on MacOS

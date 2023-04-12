@@ -4,6 +4,7 @@ plugins {
     id "org.springframework.boot" version "${springBootVersion}"
     id "org.domaframework.doma.compile" version "2.0.0"
     id "com.google.cloud.tools.jib" version "3.3.0"
+    id "org.graalvm.buildtools.native" version "0.9.21"
     id "org.eclipse.jkube.kubernetes" version "${jkubeVersion}"
     id "com.avast.gradle.docker-compose" version "0.16.9"
     id "com.diffplug.spotless" version "${spotlessVersion}"
@@ -67,6 +68,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "org.springframework.boot:spring-boot-starter-data-redis"
     developmentOnly "org.springframework.boot:spring-boot-devtools"
+    annotationProcessor "org.springframework:spring-context-indexer"
 
     implementation "org.springframework.data:spring-data-commons"
     implementation "org.seasar.doma.boot:doma-spring-boot-starter:${domaSpringBootVersion}"
@@ -109,7 +111,19 @@ tasks.named("test") {
     }
 }
 
-compileJava.dependsOn "spotlessApply"
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask("processAot")) {
+        tasks.findByName("spotlessApply").enabled(false)
+    }
+}
+
+graalvmNative {
+    metadataRepository {
+        enabled = true
+    }
+}
+
+//compileJava.dependsOn "spotlessApply"
 k8sBuild.dependsOn "build"
 k8sResource.dependsOn "k8sBuild"
 k8sApply.dependsOn "k8sResource"

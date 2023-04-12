@@ -24,6 +24,7 @@ public class MessageUtils {
    */
   public static String getMessage(String key, Object... args) {
     Locale locale = LocaleContextHolder.getLocale();
+    locale = getLocale(locale);
     return MessageUtils.messageSource.getMessage(key, args, locale);
   }
 
@@ -36,6 +37,7 @@ public class MessageUtils {
    * @return
    */
   public static String getMessage(String key, Locale locale, Object... args) {
+    locale = getLocale(locale);
     return MessageUtils.messageSource.getMessage(key, args, locale);
   }
 
@@ -47,6 +49,14 @@ public class MessageUtils {
    */
   public static String getMessage(MessageSourceResolvable resolvable) {
     Locale locale = LocaleContextHolder.getLocale();
+    locale = getLocale(locale);
     return MessageUtils.messageSource.getMessage(resolvable, locale);
+  }
+
+  private static Locale getLocale(Locale locale) {
+    if (locale == Locale.JAPANESE) {
+      locale = Locale.JAPAN;
+    }
+    return locale;
   }
 }
