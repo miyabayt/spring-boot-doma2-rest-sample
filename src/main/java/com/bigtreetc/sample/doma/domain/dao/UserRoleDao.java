@@ -1,9 +1,6 @@
 package com.bigtreetc.sample.doma.domain.dao;
 
-import com.bigtreetc.sample.doma.domain.model.Permission;
-import com.bigtreetc.sample.doma.domain.model.PermissionCriteria;
-import com.bigtreetc.sample.doma.domain.model.UserCriteria;
-import com.bigtreetc.sample.doma.domain.model.UserRole;
+import com.bigtreetc.sample.doma.domain.model.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collector;
@@ -16,7 +13,7 @@ import org.seasar.doma.jdbc.SelectOptions;
 public interface UserRoleDao {
 
   /**
-   * 権限を取得します。
+   * ユーザロールを検索します。
    *
    * @param userCriteria
    * @param permissionCriteria
@@ -31,7 +28,7 @@ public interface UserRoleDao {
       final Collector<UserRole, ?, R> collector);
 
   /**
-   * 権限を取得します。
+   * ユーザロールを検索します。
    *
    * @param id
    * @param collector
@@ -42,7 +39,7 @@ public interface UserRoleDao {
   <R> R selectByUserId(Long id, final Collector<UserRole, ?, R> collector);
 
   /**
-   * 権限を1件取得します。
+   * ユーザロールを1件取得します。
    *
    * @param id
    * @return
@@ -51,7 +48,7 @@ public interface UserRoleDao {
   Optional<Permission> selectById(Long id);
 
   /**
-   * 権限を1件取得します。
+   * ユーザロールを1件取得します。
    *
    * @param criteria
    * @return
@@ -60,7 +57,7 @@ public interface UserRoleDao {
   Optional<Permission> select(PermissionCriteria criteria);
 
   /**
-   * 権限を登録します。
+   * ユーザロールを登録します。
    *
    * @param userRole
    * @return
@@ -69,7 +66,7 @@ public interface UserRoleDao {
   int insert(UserRole userRole);
 
   /**
-   * 権限を更新します。
+   * ユーザロールを更新します。
    *
    * @param userRole
    * @return
@@ -78,7 +75,7 @@ public interface UserRoleDao {
   int update(UserRole userRole);
 
   /**
-   * 権限を削除します。
+   * ユーザロールを削除します。
    *
    * @param userRole
    * @return
@@ -87,7 +84,7 @@ public interface UserRoleDao {
   int delete(UserRole userRole);
 
   /**
-   * 権限を一括登録します。
+   * ユーザロールを一括登録します。
    *
    * @param userRoles
    * @return

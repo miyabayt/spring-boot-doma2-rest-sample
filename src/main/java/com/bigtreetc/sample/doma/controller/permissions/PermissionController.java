@@ -1,10 +1,8 @@
 package com.bigtreetc.sample.doma.controller.permissions;
 
-import static com.bigtreetc.sample.doma.base.util.TypeUtils.toListType;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
-import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
@@ -17,24 +15,23 @@ import com.bigtreetc.sample.doma.domain.service.PermissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "権限")
+@Tag(name = "権限マスタ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api/system", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,13 +58,13 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を登録します。
+   * 権限マスタを登録します。
    *
    * @param request
    * @param errors
    * @return
    */
-  @Operation(summary = "権限登録", description = "権限を登録します。")
+  @Operation(summary = "権限マスタ登録", description = "権限マスタを登録します。")
   @PreAuthorize("hasAuthority('permission:save')")
   @PostMapping(value = "/permission")
   public ApiResponse create(@Validated @RequestBody PermissionRequest request, Errors errors) {
@@ -89,12 +86,12 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を一括登録します。
+   * 権限マスタを一括登録します。
    *
    * @param requests
    * @return
    */
-  @Operation(summary = "権限一括登録", description = "権限を一括登録します。")
+  @Operation(summary = "権限マスタ一括登録", description = "権限マスタを一括登録します。")
   @PreAuthorize("hasAuthority('permission:save')")
   @PostMapping(value = "/permissions")
   public ApiResponse createAll(
@@ -117,13 +114,13 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を検索します。
+   * 権限マスタを検索します。
    *
    * @param request
    * @return
    */
   @PageableAsQueryParam
-  @Operation(summary = "権限検索", description = "権限を検索します。")
+  @Operation(summary = "権限マスタ検索", description = "権限マスタを検索します。")
   @PreAuthorize("hasAuthority('permission:read')")
   @GetMapping(value = "/permissions")
   public ApiResponse search(
@@ -142,13 +139,13 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を検索します。（POST版）
+   * 権限マスタを検索します。（POST版）
    *
    * @param request
    * @return
    */
   @PageableAsQueryParam
-  @Operation(summary = "権限検索", description = "権限を検索します。")
+  @Operation(summary = "権限マスタ検索", description = "権限マスタを検索します。")
   @PreAuthorize("hasAuthority('permission:read')")
   @PostMapping(value = "/permissions/search")
   public ApiResponse searchByPost(
@@ -157,12 +154,12 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を取得します。
+   * 権限マスタを取得します。
    *
    * @param permissionId
    * @return
    */
-  @Operation(summary = "権限取得", description = "権限を取得します。")
+  @Operation(summary = "権限マスタ取得", description = "権限マスタを取得します。")
   @PreAuthorize("hasAuthority('permission:read')")
   @GetMapping("/permission/{id}")
   public ApiResponse findOne(@PathVariable Long permissionId) {
@@ -176,13 +173,13 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を更新します。
+   * 権限マスタを更新します。
    *
    * @param request
    * @param errors
    * @return
    */
-  @Operation(summary = "権限更新", description = "権限を更新します。")
+  @Operation(summary = "権限マスタ更新", description = "権限マスタを更新します。")
   @PreAuthorize("hasAuthority('permission:save')")
   @PutMapping("/permission/{id}")
   public ApiResponse update(
@@ -208,13 +205,13 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を一括更新します。
+   * 権限マスタを一括更新します。
    *
    * @param requests
    * @param errors
    * @return
    */
-  @Operation(summary = "権限一括更新", description = "権限を一括更新します。")
+  @Operation(summary = "権限マスタ一括更新", description = "権限マスタを一括更新します。")
   @PreAuthorize("hasAuthority('permission:save')")
   @PutMapping("/permission")
   public ApiResponse update(
@@ -238,12 +235,12 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を削除します。
+   * 権限マスタを削除します。
    *
    * @param id
    * @return
    */
-  @Operation(summary = "権限削除", description = "権限を削除します。")
+  @Operation(summary = "権限マスタ削除", description = "権限マスタを削除します。")
   @PreAuthorize("hasAuthority('permission:save')")
   @DeleteMapping("/permission/{id}")
   public ApiResponse delete(@PathVariable("id") Long id) {
@@ -257,13 +254,13 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * 権限を一括削除します。
+   * 権限マスタを一括削除します。
    *
    * @param requests
    * @param errors
    * @return
    */
-  @Operation(summary = "権限一括削除", description = "権限を一括削除します。")
+  @Operation(summary = "権限マスタ一括削除", description = "権限マスタを一括削除します。")
   @PreAuthorize("hasAuthority('permission:save')")
   @DeleteMapping("/permissions")
   public ApiResponse deleteAll(
@@ -287,24 +284,49 @@ public class PermissionController extends AbstractRestController {
   }
 
   /**
-   * TSVファイルをダウンロードします。
+   * CSV出力
    *
    * @param filename
+   * @param request
+   * @param response
    * @return
    */
-  @Operation(summary = "権限CSV出力", description = "CSVファイルを出力します。")
+  @Operation(summary = "権限マスタCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('permission:read')")
   @GetMapping("/permissions/export/{filename:.+\\.csv}")
-  public ResponseEntity<Resource> downloadTsv(@PathVariable String filename) throws Exception {
-    // ファイルを読み込む
-    val permissions = permissionService.findAll(new PermissionCriteria(), Pageable.unpaged());
+  public void downloadCsv(
+      @PathVariable String filename,
+      @ModelAttribute SearchPermissionRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    // ダウンロード時のファイル名をセットする
+    setContentDispositionHeader(response, filename, true);
 
-    // 詰め替える
-    List<PermissionCsv> csvList =
-        modelMapper.map(permissions.getContent(), toListType(PermissionCsv.class));
+    // 入力値から検索条件を作成する
+    val criteria = modelMapper.map(request, PermissionCriteria.class);
 
-    val outputStream = CsvUtils.writeCsv(PermissionCsv.class, csvList);
-    val resource = new ByteArrayResource(outputStream.toByteArray());
-    return toResponseEntity(resource, filename, true);
+    // CSV出力する
+    try (val outputStream = response.getOutputStream()) {
+      permissionService.writeToOutputStream(outputStream, criteria, PermissionCsv.class);
+    }
+  }
+
+  /**
+   * CSV出力（POST版）
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "権限マスタCSV出力", description = "CSVファイルを出力します。")
+  @PreAuthorize("hasAuthority('permission:read')")
+  @PostMapping("/permissions/export/{filename:.+\\.csv}")
+  public void searchByPost(
+      @PathVariable String filename,
+      @RequestBody SearchPermissionRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    downloadCsv(filename, request, response);
   }
 }

@@ -10,6 +10,7 @@ import com.bigtreetc.sample.doma.domain.model.CodeCategoryCriteria;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -37,7 +38,7 @@ public class CodeCategoryRepository {
   }
 
   /**
-   * コード分類マスタを複数取得します。
+   * コード分類マスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -47,6 +48,16 @@ public class CodeCategoryRepository {
     val options = toSelectOptions(pageable).count();
     val data = codeCategoryDao.selectAll(criteria, options, toList());
     return new PageImpl<>(data, pageable, options.getCount());
+  }
+
+  /**
+   * コード分類マスタを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  public Stream<CodeCategory> findAll(CodeCategoryCriteria criteria) {
+    return codeCategoryDao.selectAll(criteria);
   }
 
   /**

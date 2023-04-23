@@ -10,6 +10,7 @@ import com.bigtreetc.sample.doma.domain.model.PermissionCriteria;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -26,7 +27,7 @@ public class PermissionRepository {
   @NonNull final PermissionDao permissionDao;
 
   /**
-   * 権限を複数取得します。
+   * 権限マスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -39,7 +40,17 @@ public class PermissionRepository {
   }
 
   /**
-   * 権限を取得します。
+   * 権限マスタを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  public Stream<Permission> findAll(PermissionCriteria criteria) {
+    return permissionDao.selectAll(criteria);
+  }
+
+  /**
+   * 権限マスタを取得します。
    *
    * @param criteria
    * @return
@@ -49,7 +60,7 @@ public class PermissionRepository {
   }
 
   /**
-   * 権限を取得します。
+   * 権限マスタを取得します。
    *
    * @return
    */
@@ -60,19 +71,18 @@ public class PermissionRepository {
   }
 
   /**
-   * 権限を登録します。
+   * 権限マスタを登録します。
    *
    * @param inputPermission
    * @return
    */
   public Permission create(final Permission inputPermission) {
     permissionDao.insert(inputPermission);
-
     return inputPermission;
   }
 
   /**
-   * ロールを一括登録します。
+   * 権限マスタを一括登録します。
    *
    * @param permissions
    * @return
@@ -83,7 +93,7 @@ public class PermissionRepository {
   }
 
   /**
-   * 権限を更新します。
+   * 権限マスタを更新します。
    *
    * @param inputPermission
    * @return
@@ -99,7 +109,7 @@ public class PermissionRepository {
   }
 
   /**
-   * ロールを一括更新します。
+   * 権限マスタを一括更新します。
    *
    * @param permissions
    * @return
@@ -110,7 +120,7 @@ public class PermissionRepository {
   }
 
   /**
-   * 権限を削除します。
+   * 権限マスタを削除します。
    *
    * @return
    */
@@ -129,7 +139,7 @@ public class PermissionRepository {
   }
 
   /**
-   * ロールを一括削除します。
+   * 権限マスタを一括削除します。
    *
    * @return
    */

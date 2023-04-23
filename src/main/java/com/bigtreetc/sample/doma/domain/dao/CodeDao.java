@@ -5,16 +5,18 @@ import com.bigtreetc.sample.doma.domain.model.CodeCriteria;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 import org.seasar.doma.*;
 import org.seasar.doma.boot.ConfigAutowireable;
 import org.seasar.doma.jdbc.SelectOptions;
+import org.seasar.doma.message.Message;
 
 @ConfigAutowireable
 @Dao
 public interface CodeDao {
 
   /**
-   * コードを取得します。
+   * コードマスタを検索します。
    *
    * @param criteria
    * @param options
@@ -27,7 +29,17 @@ public interface CodeDao {
       final Collector<Code, ?, R> collector);
 
   /**
-   * コードを1件取得します。
+   * コードマスタを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  @Select
+  @Suppress(messages = {Message.DOMA4274})
+  Stream<Code> selectAll(final CodeCriteria criteria);
+
+  /**
+   * コードマスタを1件取得します。
    *
    * @param id
    * @return
@@ -36,7 +48,7 @@ public interface CodeDao {
   Optional<Code> selectById(Long id);
 
   /**
-   * コードを1件取得します。
+   * コードマスタを1件取得します。
    *
    * @param criteria
    * @return
@@ -45,7 +57,7 @@ public interface CodeDao {
   Optional<Code> select(CodeCriteria criteria);
 
   /**
-   * コードを登録します。
+   * コードマスタを登録します。
    *
    * @param Code
    * @return
@@ -54,7 +66,7 @@ public interface CodeDao {
   int insert(Code Code);
 
   /**
-   * コードを更新します。
+   * コードマスタを更新します。
    *
    * @param code
    * @return
@@ -63,7 +75,7 @@ public interface CodeDao {
   int update(Code code);
 
   /**
-   * コードを削除します。
+   * コードマスタを削除します。
    *
    * @param code
    * @return
@@ -72,7 +84,7 @@ public interface CodeDao {
   int delete(Code code);
 
   /**
-   * コードを一括登録します。
+   * コードマスタを一括登録します。
    *
    * @param codes
    * @return
@@ -81,7 +93,7 @@ public interface CodeDao {
   int[] insert(List<Code> codes);
 
   /**
-   * コードを一括更新します。
+   * コードマスタを一括更新します。
    *
    * @param codes
    * @return
@@ -90,7 +102,7 @@ public interface CodeDao {
   int[] update(List<Code> codes);
 
   /**
-   * コードを一括削除します。
+   * コードマスタを一括削除します。
    *
    * @param codes
    * @return

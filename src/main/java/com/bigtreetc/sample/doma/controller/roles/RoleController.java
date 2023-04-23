@@ -1,10 +1,8 @@
 package com.bigtreetc.sample.doma.controller.roles;
 
-import static com.bigtreetc.sample.doma.base.util.TypeUtils.toListType;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
-import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
@@ -19,24 +17,22 @@ import com.bigtreetc.sample.doma.domain.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "ロール")
+@Tag(name = "ロールマスタ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api/system", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -55,12 +51,12 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを登録します。
+   * ロールマスタを登録します。
    *
    * @param request
    * @return
    */
-  @Operation(summary = "ロール登録", description = "ロールを登録します。")
+  @Operation(summary = "ロールマスタ登録", description = "ロールマスタを登録します。")
   @PreAuthorize("hasAuthority('role:save')")
   @PostMapping("/role")
   public ApiResponse create(@Validated @RequestBody RoleRequest request, Errors errors) {
@@ -90,12 +86,12 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを一括登録します。
+   * ロールマスタを一括登録します。
    *
    * @param requests
    * @return
    */
-  @Operation(summary = "ロール一括登録", description = "ロールを一括登録します。")
+  @Operation(summary = "ロールマスタ一括登録", description = "ロールマスタを一括登録します。")
   @PreAuthorize("hasAuthority('role:save')")
   @PostMapping(value = "/roles")
   public ApiResponse createAll(
@@ -118,14 +114,14 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを検索します。
+   * ロールマスタを検索します。
    *
    * @param request
    * @param pageable
    * @return
    */
   @PageableAsQueryParam
-  @Operation(summary = "ロール検索", description = "ロールを検索します。")
+  @Operation(summary = "ロールマスタ検索", description = "ロールマスタを検索します。")
   @PreAuthorize("hasAuthority('role:read')")
   @GetMapping("/roles")
   public ApiResponse search(
@@ -143,14 +139,14 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを検索します。（POST版）
+   * ロールマスタを検索します。（POST版）
    *
    * @param request
    * @param pageable
    * @return
    */
   @PageableAsQueryParam
-  @Operation(summary = "ロール検索", description = "ロールを検索します。")
+  @Operation(summary = "ロールマスタ検索", description = "ロールマスタを検索します。")
   @PreAuthorize("hasAuthority('role:read')")
   @PostMapping("/roles/search")
   public ApiResponse searchByPost(
@@ -159,12 +155,12 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを取得します。
+   * ロールマスタを取得します。
    *
    * @param roleId
    * @return
    */
-  @Operation(summary = "ロール取得", description = "ロールを取得します。")
+  @Operation(summary = "ロールマスタ取得", description = "ロールマスタを取得します。")
   @PreAuthorize("hasAuthority('role:read')")
   @GetMapping("/role/{roleId}")
   public ApiResponse findOne(@PathVariable Long roleId) {
@@ -178,13 +174,13 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを更新します。
+   * ロールマスタを更新します。
    *
    * @param roleId
    * @param request
    * @return
    */
-  @Operation(summary = "ロール更新", description = "ロールを更新します。")
+  @Operation(summary = "ロールマスタ更新", description = "ロールマスタを更新します。")
   @PreAuthorize("hasAuthority('role:save')")
   @PutMapping("/role/{roleId}")
   public ApiResponse update(
@@ -217,12 +213,12 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを一括更新します。
+   * ロールマスタを一括更新します。
    *
    * @param requests
    * @return
    */
-  @Operation(summary = "ロール一括更新", description = "ロールを一括更新します。")
+  @Operation(summary = "ロールマスタ一括更新", description = "ロールマスタを一括更新します。")
   @PreAuthorize("hasAuthority('role:save')")
   @PutMapping(value = "/roles")
   public ApiResponse update(@Validated @RequestBody Requests<RoleRequest> requests, Errors errors) {
@@ -244,12 +240,12 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを削除します。
+   * ロールマスタを削除します。
    *
    * @param roleId
    * @return
    */
-  @Operation(summary = "ロール削除", description = "ロールを削除します。")
+  @Operation(summary = "ロールマスタ削除", description = "ロールマスタを削除します。")
   @PreAuthorize("hasAuthority('role:save')")
   @DeleteMapping("/role/{roleId}")
   public ApiResponse delete(@PathVariable Long roleId) {
@@ -263,12 +259,12 @@ public class RoleController extends AbstractRestController {
   }
 
   /**
-   * ロールを一括削除します。
+   * ロールマスタを一括削除します。
    *
    * @param requests
    * @return
    */
-  @Operation(summary = "ロール一括削除", description = "ロールを一括削除します。")
+  @Operation(summary = "ロールマスタ一括削除", description = "ロールマスタを一括削除します。")
   @PreAuthorize("hasAuthority('role:save')")
   @DeleteMapping(value = "/roles")
   public ApiResponse deleteAll(
@@ -294,19 +290,46 @@ public class RoleController extends AbstractRestController {
    * CSV出力
    *
    * @param filename
+   * @param request
+   * @param response
    * @return
    */
-  @Operation(summary = "ロールCSV出力", description = "CSVファイルを出力します。")
+  @Operation(summary = "ロールマスタCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('role:read')")
   @GetMapping("/roles/export/{filename:.+\\.csv}")
-  public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {
-    val roles = roleService.findAll(new RoleCriteria(), Pageable.unpaged());
+  public void downloadCsv(
+      @PathVariable String filename,
+      @ModelAttribute SearchRoleRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    // ダウンロード時のファイル名をセットする
+    setContentDispositionHeader(response, filename, true);
 
-    // 詰め替える
-    List<RoleCsv> csvList = modelMapper.map(roles.getContent(), toListType(RoleCsv.class));
+    // 入力値から検索条件を作成する
+    val criteria = modelMapper.map(request, RoleCriteria.class);
 
-    val outputStream = CsvUtils.writeCsv(RoleCsv.class, csvList);
-    val resource = new ByteArrayResource(outputStream.toByteArray());
-    return toResponseEntity(resource, filename, true);
+    // CSV出力する
+    try (val outputStream = response.getOutputStream()) {
+      roleService.writeToOutputStream(outputStream, criteria, RoleCsv.class);
+    }
+  }
+
+  /**
+   * CSV出力（POST版）
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "ロールマスタCSV出力", description = "CSVファイルを出力します。")
+  @PreAuthorize("hasAuthority('role:read')")
+  @PostMapping("/roles/export/{filename:.+\\.csv}")
+  public void searchByPost(
+      @PathVariable String filename,
+      @RequestBody SearchRoleRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    downloadCsv(filename, request, response);
   }
 }

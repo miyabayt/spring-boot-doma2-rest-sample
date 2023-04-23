@@ -1,13 +1,17 @@
 package com.bigtreetc.sample.doma.domain.service;
 
 import com.bigtreetc.sample.doma.base.domain.service.BaseTransactionalService;
+import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.domain.model.User;
 import com.bigtreetc.sample.doma.domain.model.UserCriteria;
 import com.bigtreetc.sample.doma.domain.repository.UserRepository;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,7 +25,7 @@ public class UserService extends BaseTransactionalService {
   @NonNull final UserRepository userRepository;
 
   /**
-   * ユーザを複数取得します。
+   * ユーザを検索します。
    *
    * @return
    */
@@ -116,5 +120,21 @@ public class UserService extends BaseTransactionalService {
   public int deleteAll(final List<User> users) {
     Assert.notNull(users, "user must not be null");
     return userRepository.deleteAll(users);
+  }
+
+  /**
+   * ユーザを書き出します。
+   *
+   * @param outputStream
+   * @param
+   * @return
+   */
+  @Transactional(readOnly = true) // 読み取りのみの場合は指定する
+  public void writeToOutputStream(OutputStream outputStream, UserCriteria criteria, Class<?> clazz)
+      throws IOException {
+    Assert.notNull(criteria, "criteria must not be null");
+    try (val data = userRepository.findAll(criteria)) {
+      CsvUtils.writeCsv(outputStream, clazz, data, user -> modelMapper.map(user, clazz));
+    }
   }
 }

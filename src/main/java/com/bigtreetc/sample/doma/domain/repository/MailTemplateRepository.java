@@ -10,6 +10,7 @@ import com.bigtreetc.sample.doma.domain.model.MailTemplateCriteria;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -36,7 +37,7 @@ public class MailTemplateRepository {
   }
 
   /**
-   * メールテンプレートを複数取得します。
+   * メールテンプレートを検索します。
    *
    * @param criteria
    * @param pageable
@@ -46,6 +47,16 @@ public class MailTemplateRepository {
     val options = toSelectOptions(pageable).count();
     val data = mailTemplateDao.selectAll(criteria, options, toList());
     return new PageImpl<>(data, pageable, options.getCount());
+  }
+
+  /**
+   * メールテンプレートを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  public Stream<MailTemplate> findAll(MailTemplateCriteria criteria) {
+    return mailTemplateDao.selectAll(criteria);
   }
 
   /**

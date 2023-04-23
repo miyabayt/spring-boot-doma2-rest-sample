@@ -1,25 +1,40 @@
 package com.bigtreetc.sample.doma.domain.dao;
 
-import com.bigtreetc.sample.doma.domain.model.UploadFile;
-import com.bigtreetc.sample.doma.domain.model.UploadFileCriteria;
+import com.bigtreetc.sample.doma.domain.model.*;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 import org.seasar.doma.*;
 import org.seasar.doma.boot.ConfigAutowireable;
 import org.seasar.doma.jdbc.SelectOptions;
+import org.seasar.doma.message.Message;
 
 @ConfigAutowireable
 @Dao
 public interface UploadFileDao {
 
   /**
-   * アップロードファイルを取得します。
+   * アップロードファイルを検索します。
    *
    * @param criteria
    * @param options
    * @return
    */
+  @Select(strategy = SelectType.COLLECT)
+  <R> R selectAll(
+      UploadFileCriteria criteria,
+      SelectOptions options,
+      final Collector<StaffRole, ?, R> collector);
+
+  /**
+   * アップロードファイルを検索します。
+   *
+   * @param criteria
+   * @return
+   */
   @Select
-  List<UploadFile> selectAll(UploadFileCriteria criteria, SelectOptions options);
+  @Suppress(messages = {Message.DOMA4274})
+  Stream<UploadFile> selectAll(final UploadFileCriteria criteria);
 
   /**
    * アップロードファイルを1件取得します。

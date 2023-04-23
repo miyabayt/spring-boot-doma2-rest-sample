@@ -10,6 +10,7 @@ import com.bigtreetc.sample.doma.domain.model.CodeCriteria;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -25,7 +26,7 @@ public class CodeRepository {
   @NonNull final CodeDao codeDao;
 
   /**
-   * コードを全件取得します。
+   * コードマスタを全件取得します。
    *
    * @return
    */
@@ -36,7 +37,7 @@ public class CodeRepository {
   }
 
   /**
-   * コードを複数取得します。
+   * コードマスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -49,7 +50,17 @@ public class CodeRepository {
   }
 
   /**
-   * コードを取得します。
+   * コードマスタを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  public Stream<Code> findAll(CodeCriteria criteria) {
+    return codeDao.selectAll(criteria);
+  }
+
+  /**
+   * コードマスタを取得します。
    *
    * @param criteria
    * @return
@@ -59,7 +70,7 @@ public class CodeRepository {
   }
 
   /**
-   * コードを取得します。
+   * コードマスタを取得します。
    *
    * @return
    */
@@ -70,7 +81,7 @@ public class CodeRepository {
   }
 
   /**
-   * コードを登録します。
+   * コードマスタを登録します。
    *
    * @param code
    * @return
@@ -81,7 +92,7 @@ public class CodeRepository {
   }
 
   /**
-   * コードを一括登録します。
+   * コードマスタを一括登録します。
    *
    * @param codes
    * @return
@@ -92,7 +103,7 @@ public class CodeRepository {
   }
 
   /**
-   * コードを更新します。
+   * コードマスタを更新します。
    *
    * @param code
    * @return
@@ -108,7 +119,7 @@ public class CodeRepository {
   }
 
   /**
-   * コードを一括更新します。
+   * コードマスタを一括更新します。
    *
    * @param codes
    * @return
@@ -119,7 +130,7 @@ public class CodeRepository {
   }
 
   /**
-   * コードを削除します。
+   * コードマスタを削除します。
    *
    * @return
    */
@@ -138,7 +149,7 @@ public class CodeRepository {
   }
 
   /**
-   * コードを一括削除します。
+   * コードマスタを一括削除します。
    *
    * @return
    */

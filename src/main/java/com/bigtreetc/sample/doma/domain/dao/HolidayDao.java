@@ -5,16 +5,18 @@ import com.bigtreetc.sample.doma.domain.model.HolidayCriteria;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 import org.seasar.doma.*;
 import org.seasar.doma.boot.ConfigAutowireable;
 import org.seasar.doma.jdbc.SelectOptions;
+import org.seasar.doma.message.Message;
 
 @ConfigAutowireable
 @Dao
 public interface HolidayDao {
 
   /**
-   * 祝日を取得します。
+   * 祝日マスタを検索します。
    *
    * @param criteria
    * @param options
@@ -27,7 +29,17 @@ public interface HolidayDao {
       final Collector<Holiday, ?, R> collector);
 
   /**
-   * 祝日を1件取得します。
+   * 祝日マスタを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  @Select
+  @Suppress(messages = {Message.DOMA4274})
+  Stream<Holiday> selectAll(final HolidayCriteria criteria);
+
+  /**
+   * 祝日マスタを1件取得します。
    *
    * @param id
    * @return
@@ -36,7 +48,7 @@ public interface HolidayDao {
   Optional<Holiday> selectById(Long id);
 
   /**
-   * 祝日を1件取得します。
+   * 祝日マスタを1件取得します。
    *
    * @param criteria
    * @return
@@ -45,7 +57,7 @@ public interface HolidayDao {
   Optional<Holiday> select(HolidayCriteria criteria);
 
   /**
-   * 祝日を登録します。
+   * 祝日マスタを登録します。
    *
    * @param holiday
    * @return
@@ -54,7 +66,7 @@ public interface HolidayDao {
   int insert(Holiday holiday);
 
   /**
-   * 祝日を更新します。
+   * 祝日マスタを更新します。
    *
    * @param holiday
    * @return
@@ -63,7 +75,7 @@ public interface HolidayDao {
   int update(Holiday holiday);
 
   /**
-   * 祝日を削除します。
+   * 祝日マスタを削除します。
    *
    * @param holiday
    * @return
@@ -72,7 +84,7 @@ public interface HolidayDao {
   int delete(Holiday holiday);
 
   /**
-   * 祝日を一括登録します。
+   * 祝日マスタを一括登録します。
    *
    * @param holidays
    * @return
@@ -81,7 +93,7 @@ public interface HolidayDao {
   int[] insert(List<Holiday> holidays);
 
   /**
-   * 祝日を一括更新します。
+   * 祝日マスタを一括更新します。
    *
    * @param holidays
    * @return
@@ -90,7 +102,7 @@ public interface HolidayDao {
   int[] update(List<Holiday> holidays);
 
   /**
-   * 祝日を一括削除します。
+   * 祝日マスタを一括削除します。
    *
    * @param holidays
    * @return

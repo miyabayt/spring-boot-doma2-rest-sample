@@ -1,34 +1,31 @@
 package com.bigtreetc.sample.doma.controller.users;
 
-import static com.bigtreetc.sample.doma.base.util.TypeUtils.toListType;
 import static com.bigtreetc.sample.doma.base.util.ValidateUtils.isNotEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
-import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.CountApiResponseImpl;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.PageableApiResponseImpl;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.SimpleApiResponseImpl;
+import com.bigtreetc.sample.doma.controller.codes.SearchCodeRequest;
 import com.bigtreetc.sample.doma.domain.model.User;
 import com.bigtreetc.sample.doma.domain.model.UserCriteria;
 import com.bigtreetc.sample.doma.domain.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.Errors;
@@ -287,19 +284,46 @@ public class UserController extends AbstractRestController {
    * CSV出力
    *
    * @param filename
+   * @param request
+   * @param response
    * @return
    */
   @Operation(summary = "ユーザCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('user:read')")
   @GetMapping("/users/export/{filename:.+\\.csv}")
-  public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {
-    val users = userService.findAll(new UserCriteria(), Pageable.unpaged());
+  public void downloadCsv(
+      @PathVariable String filename,
+      @ModelAttribute SearchCodeRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    // ダウンロード時のファイル名をセットする
+    setContentDispositionHeader(response, filename, true);
 
-    // 詰め替える
-    List<UserCsv> csvList = modelMapper.map(users.getContent(), toListType(UserCsv.class));
+    // 入力値から検索条件を作成する
+    val criteria = modelMapper.map(request, UserCriteria.class);
 
-    val outputStream = CsvUtils.writeCsv(UserCsv.class, csvList);
-    val resource = new ByteArrayResource(outputStream.toByteArray());
-    return toResponseEntity(resource, filename, true);
+    // CSV出力する
+    try (val outputStream = response.getOutputStream()) {
+      userService.writeToOutputStream(outputStream, criteria, UserCsv.class);
+    }
+  }
+
+  /**
+   * CSV出力（POST版）
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "ユーザCSV出力", description = "CSVファイルを出力します。")
+  @PreAuthorize("hasAuthority('user:read')")
+  @PostMapping("/users/export/{filename:.+\\.csv}")
+  public void searchByPost(
+      @PathVariable String filename,
+      @RequestBody SearchCodeRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    downloadCsv(filename, request, response);
   }
 }

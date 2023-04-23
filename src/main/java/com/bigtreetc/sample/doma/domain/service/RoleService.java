@@ -1,12 +1,12 @@
 package com.bigtreetc.sample.doma.domain.service;
 
 import com.bigtreetc.sample.doma.base.domain.service.BaseTransactionalService;
-import com.bigtreetc.sample.doma.domain.model.Permission;
-import com.bigtreetc.sample.doma.domain.model.PermissionCriteria;
-import com.bigtreetc.sample.doma.domain.model.Role;
-import com.bigtreetc.sample.doma.domain.model.RoleCriteria;
+import com.bigtreetc.sample.doma.base.util.CsvUtils;
+import com.bigtreetc.sample.doma.domain.model.*;
 import com.bigtreetc.sample.doma.domain.repository.PermissionRepository;
 import com.bigtreetc.sample.doma.domain.repository.RoleRepository;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
@@ -27,7 +27,7 @@ public class RoleService extends BaseTransactionalService {
   @NonNull final PermissionRepository permissionRepository;
 
   /**
-   * ロールを複数取得します。
+   * ロールマスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -40,7 +40,7 @@ public class RoleService extends BaseTransactionalService {
   }
 
   /**
-   * ロールを取得します。
+   * ロールマスタを取得します。
    *
    * @return
    */
@@ -59,7 +59,7 @@ public class RoleService extends BaseTransactionalService {
   }
 
   /**
-   * ロールを取得します。
+   * ロールマスタを取得します。
    *
    * @return
    */
@@ -73,7 +73,7 @@ public class RoleService extends BaseTransactionalService {
   }
 
   /**
-   * ロールを追加します。
+   * ロールマスタを追加します。
    *
    * @param inputRole
    * @return
@@ -84,7 +84,7 @@ public class RoleService extends BaseTransactionalService {
   }
 
   /**
-   * ロールを一括登録します。
+   * ロールマスタを一括登録します。
    *
    * @param roles
    * @return
@@ -95,7 +95,7 @@ public class RoleService extends BaseTransactionalService {
   }
 
   /**
-   * ロールを更新します。
+   * ロールマスタを更新します。
    *
    * @param inputRole
    * @return
@@ -106,7 +106,7 @@ public class RoleService extends BaseTransactionalService {
   }
 
   /**
-   * ロールを一括更新します。
+   * ロールマスタを一括更新します。
    *
    * @param roles
    * @return
@@ -117,7 +117,7 @@ public class RoleService extends BaseTransactionalService {
   }
 
   /**
-   * ロールを削除します。
+   * ロールマスタを削除します。
    *
    * @return
    */
@@ -127,7 +127,7 @@ public class RoleService extends BaseTransactionalService {
   }
 
   /**
-   * ロールを一括削除します。
+   * ロールマスタを一括削除します。
    *
    * @param roles
    * @return
@@ -135,6 +135,22 @@ public class RoleService extends BaseTransactionalService {
   public int deleteAll(final List<Role> roles) {
     Assert.notNull(roles, "role must not be null");
     return roleRepository.deleteAll(roles);
+  }
+
+  /**
+   * ロールマスタを書き出します。
+   *
+   * @param outputStream
+   * @param
+   * @return
+   */
+  @Transactional(readOnly = true) // 読み取りのみの場合は指定する
+  public void writeToOutputStream(OutputStream outputStream, RoleCriteria criteria, Class<?> clazz)
+      throws IOException {
+    Assert.notNull(criteria, "criteria must not be null");
+    try (val data = roleRepository.findAll(criteria)) {
+      CsvUtils.writeCsv(outputStream, clazz, data, role -> modelMapper.map(role, clazz));
+    }
   }
 
   private List<Permission> getPermissions() {

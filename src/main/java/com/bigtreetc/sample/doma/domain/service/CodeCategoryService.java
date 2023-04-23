@@ -1,13 +1,17 @@
 package com.bigtreetc.sample.doma.domain.service;
 
 import com.bigtreetc.sample.doma.base.domain.service.BaseTransactionalService;
+import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.domain.model.CodeCategory;
 import com.bigtreetc.sample.doma.domain.model.CodeCategoryCriteria;
 import com.bigtreetc.sample.doma.domain.repository.CodeCategoryRepository;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,7 +36,7 @@ public class CodeCategoryService extends BaseTransactionalService {
   }
 
   /**
-   * コード分類マスタを複数取得します。
+   * コード分類マスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -129,5 +133,23 @@ public class CodeCategoryService extends BaseTransactionalService {
   public int deleteAll(final List<CodeCategory> codeCategories) {
     Assert.notNull(codeCategories, "inputCodeCategory must not be null");
     return codeCategoryRepository.deleteAll(codeCategories);
+  }
+
+  /**
+   * コード分類マスタを書き出します。
+   *
+   * @param outputStream
+   * @param criteria
+   * @param clazz
+   * @return
+   */
+  @Transactional(readOnly = true) // 読み取りのみの場合は指定する
+  public void writeToOutputStream(
+      OutputStream outputStream, CodeCategoryCriteria criteria, Class<?> clazz) throws IOException {
+    Assert.notNull(criteria, "criteria must not be null");
+    try (val data = codeCategoryRepository.findAll(criteria)) {
+      CsvUtils.writeCsv(
+          outputStream, clazz, data, codeCategory -> modelMapper.map(codeCategory, clazz));
+    }
   }
 }

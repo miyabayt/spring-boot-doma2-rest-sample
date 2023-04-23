@@ -5,16 +5,18 @@ import com.bigtreetc.sample.doma.domain.model.MailTemplateCriteria;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 import org.seasar.doma.*;
 import org.seasar.doma.boot.ConfigAutowireable;
 import org.seasar.doma.jdbc.SelectOptions;
+import org.seasar.doma.message.Message;
 
 @ConfigAutowireable
 @Dao
 public interface MailTemplateDao {
 
   /**
-   * メールテンプレートを取得します。
+   * メールテンプレートを検索します。
    *
    * @param criteria
    * @param options
@@ -25,6 +27,16 @@ public interface MailTemplateDao {
       final MailTemplateCriteria criteria,
       final SelectOptions options,
       final Collector<MailTemplate, ?, R> collector);
+
+  /**
+   * メールテンプレートを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  @Select
+  @Suppress(messages = {Message.DOMA4274})
+  Stream<MailTemplate> selectAll(final MailTemplateCriteria criteria);
 
   /**
    * メールテンプレートを1件取得します。

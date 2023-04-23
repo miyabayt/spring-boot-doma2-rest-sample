@@ -1,9 +1,12 @@
 package com.bigtreetc.sample.doma.domain.service;
 
 import com.bigtreetc.sample.doma.base.domain.service.BaseTransactionalService;
+import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.domain.model.Staff;
 import com.bigtreetc.sample.doma.domain.model.StaffCriteria;
 import com.bigtreetc.sample.doma.domain.repository.StaffRepository;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
@@ -23,7 +26,7 @@ public class StaffService extends BaseTransactionalService {
   @NonNull final StaffRepository staffRepository;
 
   /**
-   * 担当者を複数取得します。
+   * 担当者マスタを検索します。
    *
    * @return
    */
@@ -34,7 +37,7 @@ public class StaffService extends BaseTransactionalService {
   }
 
   /**
-   * 担当者を取得します。
+   * 担当者マスタを取得します。
    *
    * @return
    */
@@ -45,7 +48,7 @@ public class StaffService extends BaseTransactionalService {
   }
 
   /**
-   * 担当者を取得します。
+   * 担当者マスタを取得します。
    *
    * @return
    */
@@ -56,7 +59,7 @@ public class StaffService extends BaseTransactionalService {
   }
 
   /**
-   * 担当者を登録します。
+   * 担当者マスタを登録します。
    *
    * @param staff
    * @return
@@ -67,7 +70,7 @@ public class StaffService extends BaseTransactionalService {
   }
 
   /**
-   * 担当者を一括登録します。
+   * 担当者マスタを一括登録します。
    *
    * @param staffs
    * @return
@@ -78,7 +81,7 @@ public class StaffService extends BaseTransactionalService {
   }
 
   /**
-   * 担当者を更新します。
+   * 担当者マスタを更新します。
    *
    * @param inputStaff
    * @return
@@ -91,7 +94,7 @@ public class StaffService extends BaseTransactionalService {
   }
 
   /**
-   * 担当者を一括更新します。
+   * 担当者マスタを一括更新します。
    *
    * @param staffs
    * @return
@@ -102,7 +105,7 @@ public class StaffService extends BaseTransactionalService {
   }
 
   /**
-   * 担当者を削除します。
+   * 担当者マスタを削除します。
    *
    * @return
    */
@@ -112,7 +115,7 @@ public class StaffService extends BaseTransactionalService {
   }
 
   /**
-   * 担当者を一括削除します。
+   * 担当者マスタを一括削除します。
    *
    * @param staffs
    * @return
@@ -120,5 +123,21 @@ public class StaffService extends BaseTransactionalService {
   public int deleteAll(final List<Staff> staffs) {
     Assert.notNull(staffs, "staff must not be null");
     return staffRepository.deleteAll(staffs);
+  }
+
+  /**
+   * 担当者マスタを書き出します。
+   *
+   * @param outputStream
+   * @param
+   * @return
+   */
+  @Transactional(readOnly = true) // 読み取りのみの場合は指定する
+  public void writeToOutputStream(OutputStream outputStream, StaffCriteria criteria, Class<?> clazz)
+      throws IOException {
+    Assert.notNull(criteria, "criteria must not be null");
+    try (val data = staffRepository.findAll(criteria)) {
+      CsvUtils.writeCsv(outputStream, clazz, data, staff -> modelMapper.map(staff, clazz));
+    }
   }
 }

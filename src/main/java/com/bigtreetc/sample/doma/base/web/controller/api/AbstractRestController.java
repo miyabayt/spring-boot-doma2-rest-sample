@@ -1,6 +1,7 @@
 package com.bigtreetc.sample.doma.base.web.controller.api;
 
 import com.bigtreetc.sample.doma.base.web.controller.api.response.*;
+import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.SneakyThrows;
@@ -38,5 +39,17 @@ public class AbstractRestController {
     }
 
     return responseEntity.body(resource);
+  }
+
+  @SneakyThrows
+  protected void setContentDispositionHeader(
+      HttpServletResponse response, String filename, boolean isAttachment) {
+    response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+    if (isAttachment) {
+      val encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
+      val contentDisposition = String.format("attachment; filename*=UTF-8''%s", encodedFilename);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, contentDisposition);
+    }
   }
 }

@@ -13,6 +13,7 @@ import com.bigtreetc.sample.doma.domain.model.StaffRole;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -33,7 +34,7 @@ public class StaffRepository {
   @NonNull final RolePermissionDao rolePermissionDao;
 
   /**
-   * 担当者を複数取得します。
+   * 担当者マスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -46,7 +47,17 @@ public class StaffRepository {
   }
 
   /**
-   * 担当者を取得します。
+   * 担当者マスタを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  public Stream<Staff> findAll(StaffCriteria criteria) {
+    return staffDao.selectAll(criteria);
+  }
+
+  /**
+   * 担当者マスタを取得します。
    *
    * @param criteria
    * @return
@@ -56,7 +67,7 @@ public class StaffRepository {
   }
 
   /**
-   * 担当者を取得します。
+   * 担当者マスタを取得します。
    *
    * @return
    */
@@ -67,7 +78,7 @@ public class StaffRepository {
   }
 
   /**
-   * 担当者を登録します。
+   * 担当者マスタを登録します。
    *
    * @param staff
    * @return
@@ -85,7 +96,7 @@ public class StaffRepository {
   }
 
   /**
-   * 担当者を一括登録します。
+   * 担当者マスタを一括登録します。
    *
    * @param staffs
    * @return
@@ -96,7 +107,7 @@ public class StaffRepository {
   }
 
   /**
-   * 担当者を更新します。
+   * 担当者マスタを更新します。
    *
    * @param inputStaff
    * @return
@@ -112,7 +123,7 @@ public class StaffRepository {
   }
 
   /**
-   * 担当者を一括更新します。
+   * 担当者マスタを一括更新します。
    *
    * @param staffs
    * @return
@@ -123,7 +134,7 @@ public class StaffRepository {
   }
 
   /**
-   * 担当者を削除します。
+   * 担当者マスタを削除します。
    *
    * @return
    */
@@ -142,7 +153,7 @@ public class StaffRepository {
   }
 
   /**
-   * 担当者を一括削除します。
+   * 担当者マスタを一括削除します。
    *
    * @return
    */

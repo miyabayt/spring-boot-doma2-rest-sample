@@ -4,8 +4,7 @@ import static com.bigtreetc.sample.doma.base.web.BaseWebConst.ACCESS_DENIED_ERRO
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.bigtreetc.sample.doma.BaseTestContainerTest;
 import com.bigtreetc.sample.doma.base.util.MessageUtils;
@@ -55,5 +54,15 @@ class StaffControllerTest extends BaseTestContainerTest {
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.success").value("false"))
         .andExpect(jsonPath("$.message").value(message));
+  }
+
+  @Test
+  @DisplayName("権限を持つロールで、担当者マスタCSVを出力できること")
+  @WithMockUser(authorities = "staff:read")
+  void test3() throws Exception {
+    mockMvc
+        .perform(get("/api/system/staffs/export/test.csv"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType("application/octet-stream"));
   }
 }
