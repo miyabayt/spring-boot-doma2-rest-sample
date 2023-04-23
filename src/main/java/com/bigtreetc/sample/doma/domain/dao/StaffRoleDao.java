@@ -1,9 +1,6 @@
 package com.bigtreetc.sample.doma.domain.dao;
 
-import com.bigtreetc.sample.doma.domain.model.Permission;
-import com.bigtreetc.sample.doma.domain.model.PermissionCriteria;
-import com.bigtreetc.sample.doma.domain.model.StaffCriteria;
-import com.bigtreetc.sample.doma.domain.model.StaffRole;
+import com.bigtreetc.sample.doma.domain.model.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collector;
@@ -16,7 +13,7 @@ import org.seasar.doma.jdbc.SelectOptions;
 public interface StaffRoleDao {
 
   /**
-   * 担当者権限を取得します。
+   * 担当者権限を検索します。
    *
    * @param staffCriteria
    * @param permissionCriteria
@@ -31,7 +28,7 @@ public interface StaffRoleDao {
       final Collector<StaffRole, ?, R> collector);
 
   /**
-   * 担当者権限を取得します。
+   * 担当者権限を検索します。
    *
    * @param id
    * @param collector

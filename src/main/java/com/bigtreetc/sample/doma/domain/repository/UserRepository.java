@@ -13,6 +13,7 @@ import com.bigtreetc.sample.doma.domain.model.UserRole;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -33,7 +34,7 @@ public class UserRepository {
   @NonNull final UploadFileDao uploadFileDao;
 
   /**
-   * ユーザを取得します。
+   * ユーザを検索します。
    *
    * @param criteria
    * @param pageable
@@ -43,6 +44,16 @@ public class UserRepository {
     val options = toSelectOptions(pageable).count();
     val data = userDao.selectAll(criteria, options, toList());
     return new PageImpl<>(data, pageable, options.getCount());
+  }
+
+  /**
+   * ユーザを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  public Stream<User> findAll(UserCriteria criteria) {
+    return userDao.selectAll(criteria);
   }
 
   /**

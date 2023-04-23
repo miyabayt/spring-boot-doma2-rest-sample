@@ -2,13 +2,17 @@ package com.bigtreetc.sample.doma.domain.service;
 
 import com.bigtreetc.sample.doma.base.domain.service.BaseTransactionalService;
 import com.bigtreetc.sample.doma.base.exception.NoDataFoundException;
+import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.domain.model.MailTemplate;
 import com.bigtreetc.sample.doma.domain.model.MailTemplateCriteria;
 import com.bigtreetc.sample.doma.domain.repository.MailTemplateRepository;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +26,7 @@ public class MailTemplateService extends BaseTransactionalService {
   @NonNull final MailTemplateRepository mailTemplateRepository;
 
   /**
-   * メールテンプレートを複数取得します。
+   * メールテンプレートを検索します。
    *
    * @return
    */
@@ -120,5 +124,22 @@ public class MailTemplateService extends BaseTransactionalService {
   public int deleteAll(final List<MailTemplate> mailTemplates) {
     Assert.notNull(mailTemplates, "mailTemplate must not be null");
     return mailTemplateRepository.deleteAll(mailTemplates);
+  }
+
+  /**
+   * メールテンプレートを書き出します。
+   *
+   * @param outputStream
+   * @param
+   * @return
+   */
+  @Transactional(readOnly = true) // 読み取りのみの場合は指定する
+  public void writeToOutputStream(
+      OutputStream outputStream, MailTemplateCriteria criteria, Class<?> clazz) throws IOException {
+    Assert.notNull(criteria, "criteria must not be null");
+    try (val data = mailTemplateRepository.findAll(criteria)) {
+      CsvUtils.writeCsv(
+          outputStream, clazz, data, mailTemplate -> modelMapper.map(mailTemplate, clazz));
+    }
   }
 }

@@ -1,10 +1,8 @@
 package com.bigtreetc.sample.doma.controller.holidays;
 
-import static com.bigtreetc.sample.doma.base.util.TypeUtils.toListType;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
-import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
@@ -17,17 +15,15 @@ import com.bigtreetc.sample.doma.domain.service.HolidayService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -51,7 +47,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を登録します。
+   * 祝日マスタを登録します。
    *
    * @param request
    * @return
@@ -78,7 +74,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を一括登録します。
+   * 祝日マスタを一括登録します。
    *
    * @param requests
    * @return
@@ -106,7 +102,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を検索します。
+   * 祝日マスタを検索します。
    *
    * @param request
    * @param pageable
@@ -131,7 +127,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を検索します。（POST版）
+   * 祝日マスタを検索します。（POST版）
    *
    * @param request
    * @param pageable
@@ -147,7 +143,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を取得します。
+   * 祝日マスタを取得します。
    *
    * @param holidayId
    * @return
@@ -166,7 +162,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を更新します。
+   * 祝日マスタを更新します。
    *
    * @param holidayId
    * @param request
@@ -196,7 +192,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を一括更新します。
+   * 祝日マスタを一括更新します。
    *
    * @param requests
    * @return
@@ -224,7 +220,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を削除します。
+   * 祝日マスタを削除します。
    *
    * @param holidayId
    * @return
@@ -243,7 +239,7 @@ public class HolidayController extends AbstractRestController {
   }
 
   /**
-   * 祝日を一括削除します。
+   * 祝日マスタを一括削除します。
    *
    * @param requests
    * @return
@@ -274,19 +270,46 @@ public class HolidayController extends AbstractRestController {
    * CSV出力
    *
    * @param filename
+   * @param request
+   * @param response
    * @return
    */
   @Operation(summary = "祝日マスタCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('holiday:read')")
   @GetMapping("/holidays/export/{filename:.+\\.csv}")
-  public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {
-    val holidays = holidayService.findAll(new HolidayCriteria(), Pageable.unpaged());
+  public void downloadCsv(
+      @PathVariable String filename,
+      @ModelAttribute SearchHolidayRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    // ダウンロード時のファイル名をセットする
+    setContentDispositionHeader(response, filename, true);
 
-    // 詰め替える
-    List<HolidayCsv> csvList = modelMapper.map(holidays.getContent(), toListType(HolidayCsv.class));
+    // 入力値から検索条件を作成する
+    val criteria = modelMapper.map(request, HolidayCriteria.class);
 
-    val outputStream = CsvUtils.writeCsv(HolidayCsv.class, csvList);
-    val resource = new ByteArrayResource(outputStream.toByteArray());
-    return toResponseEntity(resource, filename, true);
+    // CSV出力する
+    try (val outputStream = response.getOutputStream()) {
+      holidayService.writeToOutputStream(outputStream, criteria, HolidayCsv.class);
+    }
+  }
+
+  /**
+   * CSV出力（POST版）
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "祝日マスタCSV出力", description = "CSVファイルを出力します。")
+  @PreAuthorize("hasAuthority('holiday:read')")
+  @PostMapping("/holidays/export/{filename:.+\\.csv}")
+  public void searchByPost(
+      @PathVariable String filename,
+      @RequestBody SearchHolidayRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    downloadCsv(filename, request, response);
   }
 }

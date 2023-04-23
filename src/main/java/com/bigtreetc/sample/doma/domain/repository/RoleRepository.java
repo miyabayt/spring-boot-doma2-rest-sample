@@ -7,13 +7,11 @@ import static org.seasar.doma.boot.Pageables.toSelectOptions;
 import com.bigtreetc.sample.doma.base.exception.NoDataFoundException;
 import com.bigtreetc.sample.doma.domain.dao.RoleDao;
 import com.bigtreetc.sample.doma.domain.dao.RolePermissionDao;
-import com.bigtreetc.sample.doma.domain.model.Role;
-import com.bigtreetc.sample.doma.domain.model.RoleCriteria;
-import com.bigtreetc.sample.doma.domain.model.RolePermission;
-import com.bigtreetc.sample.doma.domain.model.RolePermissionCriteria;
+import com.bigtreetc.sample.doma.domain.model.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -32,7 +30,7 @@ public class RoleRepository {
   @NonNull final RolePermissionDao rolePermissionDao;
 
   /**
-   * ロールを複数取得します。
+   * ロールマスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -45,7 +43,17 @@ public class RoleRepository {
   }
 
   /**
-   * ロールを取得します。
+   * ロールマスタを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  public Stream<Role> findAll(RoleCriteria criteria) {
+    return roleDao.selectAll(criteria);
+  }
+
+  /**
+   * ロールマスタを取得します。
    *
    * @param criteria
    * @return
@@ -65,7 +73,7 @@ public class RoleRepository {
   }
 
   /**
-   * ロールを取得します。
+   * ロールマスタを取得します。
    *
    * @return
    */
@@ -84,7 +92,7 @@ public class RoleRepository {
   }
 
   /**
-   * ロールを登録します。
+   * ロールマスタを登録します。
    *
    * @param inputRole
    * @return
@@ -100,7 +108,7 @@ public class RoleRepository {
   }
 
   /**
-   * ロールを一括登録します。
+   * ロールマスタを一括登録します。
    *
    * @param roles
    * @return
@@ -111,7 +119,7 @@ public class RoleRepository {
   }
 
   /**
-   * ロールを更新します。
+   * ロールマスタを更新します。
    *
    * @param inputRole
    * @return
@@ -133,7 +141,7 @@ public class RoleRepository {
   }
 
   /**
-   * ロールを一括更新します。
+   * ロールマスタを一括更新します。
    *
    * @param roles
    * @return
@@ -144,7 +152,7 @@ public class RoleRepository {
   }
 
   /**
-   * ロールを削除します。
+   * ロールマスタを削除します。
    *
    * @return
    */
@@ -166,7 +174,7 @@ public class RoleRepository {
   }
 
   /**
-   * ロールを一括削除します。
+   * ロールマスタを一括削除します。
    *
    * @return
    */

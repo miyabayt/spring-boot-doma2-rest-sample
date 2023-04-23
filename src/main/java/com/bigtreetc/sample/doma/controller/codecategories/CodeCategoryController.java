@@ -1,33 +1,30 @@
 package com.bigtreetc.sample.doma.controller.codecategories;
 
-import static com.bigtreetc.sample.doma.base.util.TypeUtils.toListType;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
-import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.CountApiResponseImpl;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.PageableApiResponseImpl;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.SimpleApiResponseImpl;
+import com.bigtreetc.sample.doma.controller.codes.SearchCodeRequest;
 import com.bigtreetc.sample.doma.domain.model.CodeCategory;
 import com.bigtreetc.sample.doma.domain.model.CodeCategoryCriteria;
 import com.bigtreetc.sample.doma.domain.service.CodeCategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -282,21 +279,46 @@ public class CodeCategoryController extends AbstractRestController {
    * CSV出力
    *
    * @param filename
+   * @param request
+   * @param response
    * @return
    */
   @Operation(summary = "コード分類マスタCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('codeCategory:read')")
   @GetMapping("/codeCategories/export/{filename:.+\\.csv}")
-  public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {
-    val codeCategories =
-        codeCategoryService.findAll(new CodeCategoryCriteria(), Pageable.unpaged());
+  public void downloadCsv(
+      @PathVariable String filename,
+      @ModelAttribute SearchCodeRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    // ダウンロード時のファイル名をセットする
+    setContentDispositionHeader(response, filename, true);
 
-    // 詰め替える
-    List<CodeCategoryCsv> csvList =
-        modelMapper.map(codeCategories.getContent(), toListType(CodeCategoryCsv.class));
+    // 入力値から検索条件を作成する
+    val criteria = modelMapper.map(request, CodeCategoryCriteria.class);
 
-    val outputStream = CsvUtils.writeCsv(CodeCategoryCsv.class, csvList);
-    val resource = new ByteArrayResource(outputStream.toByteArray());
-    return toResponseEntity(resource, filename, true);
+    // CSV出力する
+    try (val outputStream = response.getOutputStream()) {
+      codeCategoryService.writeToOutputStream(outputStream, criteria, CodeCategoryCsv.class);
+    }
+  }
+
+  /**
+   * CSV出力（POST版）
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "コード分類マスタCSV出力", description = "CSVファイルを出力します。")
+  @PreAuthorize("hasAuthority('codeCategory:read')")
+  @PostMapping("/codeCategories/export/{filename:.+\\.csv}")
+  public void searchByPost(
+      @PathVariable String filename,
+      @RequestBody SearchCodeRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    downloadCsv(filename, request, response);
   }
 }

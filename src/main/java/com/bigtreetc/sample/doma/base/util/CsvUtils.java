@@ -5,15 +5,14 @@ import static com.fasterxml.jackson.dataformat.csv.CsvGenerator.Feature.ALWAYS_Q
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 /** TSVファイル出力ユーティリティ */
 @Slf4j
 public class CsvUtils {
-
-  private static final int OUTPUT_BYTE_ARRAY_INITIAL_SIZE = 4096;
 
   private static final CsvMapper csvMapper = createCsvMapper();
 
@@ -34,11 +33,11 @@ public class CsvUtils {
    *
    * @param clazz
    * @param data
-   * @throws Exception
    */
-  public static ByteArrayOutputStream writeCsv(Class<?> clazz, Collection<?> data)
+  public static void writeCsv(
+      OutputStream outputStream, Class<?> clazz, Stream<?> data, Function<Object, ?> mapper)
       throws IOException {
-    return write(clazz, data, StandardCharsets.UTF_8.name(), ',');
+    write(outputStream, clazz, data, mapper, StandardCharsets.UTF_8.name(), ',');
   }
 
   /**
@@ -47,11 +46,15 @@ public class CsvUtils {
    * @param clazz
    * @param data
    * @param charsetName
-   * @throws Exception
    */
-  public static ByteArrayOutputStream writeCsv(
-      Class<?> clazz, Collection<?> data, String charsetName) throws IOException {
-    return write(clazz, data, charsetName, ',');
+  public static void writeCsv(
+      OutputStream outputStream,
+      Class<?> clazz,
+      Stream<?> data,
+      Function<Object, ?> mapper,
+      String charsetName)
+      throws IOException {
+    write(outputStream, clazz, data, mapper, charsetName, ',');
   }
 
   /**
@@ -59,11 +62,11 @@ public class CsvUtils {
    *
    * @param clazz
    * @param data
-   * @throws Exception
    */
-  public static ByteArrayOutputStream writeTsv(Class<?> clazz, Collection<?> data)
+  public static void writeTsv(
+      OutputStream outputStream, Class<?> clazz, Stream<?> data, Function<Object, ?> mapper)
       throws IOException {
-    return write(clazz, data, StandardCharsets.UTF_8.name(), '\t');
+    write(outputStream, clazz, data, mapper, StandardCharsets.UTF_8.name(), '\t');
   }
 
   /**
@@ -72,34 +75,53 @@ public class CsvUtils {
    * @param clazz
    * @param data
    * @param charsetName
-   * @throws Exception
    */
-  public static ByteArrayOutputStream writeTsv(
-      Class<?> clazz, Collection<?> data, String charsetName) throws IOException {
-    return write(clazz, data, charsetName, '\t');
+  public static void writeTsv(
+      OutputStream outputStream,
+      Class<?> clazz,
+      Stream<?> data,
+      Function<Object, ?> mapper,
+      String charsetName)
+      throws IOException {
+    write(outputStream, clazz, data, mapper, charsetName, '\t');
   }
 
   /**
    * CSVファイルを出力します。
    *
+   * @param outputStream
    * @param clazz
    * @param data
    * @param charsetName
    * @param delimiter
    * @return
-   * @throws Exception
    */
-  private static ByteArrayOutputStream write(
-      Class<?> clazz, Collection<?> data, String charsetName, char delimiter) throws IOException {
-    // CSVヘッダをオブジェクトから作成する
-    val schema = csvMapper.schemaFor(clazz).withHeader().withColumnSeparator(delimiter);
+  private static void write(
+      OutputStream outputStream,
+      Class<?> clazz,
+      Stream<?> data,
+      Function<Object, ?> mapper,
+      String charsetName,
+      char delimiter)
+      throws IOException {
+    // CSVスキーマ、デリミタをセットする
+    val schema = csvMapper.schemaFor(clazz).withColumnSeparator(delimiter);
 
     // 書き出し
-    val outputStream = new ByteArrayOutputStream(OUTPUT_BYTE_ARRAY_INITIAL_SIZE);
-    try (val writer = new OutputStreamWriter(outputStream, charsetName)) {
-      csvMapper.writer(schema).writeValue(writer, data);
+    try (val writer = new BufferedWriter(new OutputStreamWriter(outputStream, charsetName))) {
+      boolean header = true;
+      val iterator = data.iterator();
+      while (iterator.hasNext()) {
+        val obj = iterator.next();
+        val mapped = (mapper != null) ? mapper.apply(obj) : obj;
+        val csvWriter =
+            (header)
+                ? csvMapper.writer(schema.withHeader())
+                : csvMapper.writer(schema.withoutHeader());
+        val csvLine = csvWriter.writeValueAsString(mapped);
+        writer.write(csvLine);
+        header = false;
+      }
     }
-
-    return outputStream;
   }
 }

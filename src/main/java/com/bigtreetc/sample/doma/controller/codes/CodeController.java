@@ -1,10 +1,8 @@
 package com.bigtreetc.sample.doma.controller.codes;
 
-import static com.bigtreetc.sample.doma.base.util.TypeUtils.toListType;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
-import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
@@ -17,24 +15,22 @@ import com.bigtreetc.sample.doma.domain.service.CodeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "コード")
+@Tag(name = "コードマスタ")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api/system", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -51,12 +47,12 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを登録します。
+   * コードマスタを登録します。
    *
    * @param request
    * @return
    */
-  @Operation(summary = "コード登録", description = "コードを登録します。")
+  @Operation(summary = "コードマスタ登録", description = "コードマスタを登録します。")
   @PreAuthorize("hasAuthority('code:save')")
   @PostMapping("/code")
   public ApiResponse create(@Validated @RequestBody CodeRequest request, Errors errors) {
@@ -78,12 +74,12 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを一括登録します。
+   * コードマスタを一括登録します。
    *
    * @param requests
    * @return
    */
-  @Operation(summary = "コード一括登録", description = "コードを一括登録します。")
+  @Operation(summary = "コードマスタ一括登録", description = "コードマスタを一括登録します。")
   @PreAuthorize("hasAuthority('code:save')")
   @PostMapping(value = "/codes")
   public ApiResponse createAll(
@@ -106,14 +102,14 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを検索します。
+   * コードマスタを検索します。
    *
    * @param request
    * @param pageable
    * @return
    */
   @PageableAsQueryParam
-  @Operation(summary = "コード検索", description = "コードを検索します。")
+  @Operation(summary = "コードマスタ検索", description = "コードマスタを検索します。")
   @PreAuthorize("hasAuthority('code:read')")
   @GetMapping("/codes")
   public ApiResponse search(
@@ -131,14 +127,14 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを検索します。（POST版）
+   * コードマスタを検索します。（POST版）
    *
    * @param request
    * @param pageable
    * @return
    */
   @PageableAsQueryParam
-  @Operation(summary = "コード検索", description = "コードを検索します。")
+  @Operation(summary = "コードマスタ検索", description = "コードマスタを検索します。")
   @PreAuthorize("hasAuthority('code:read')")
   @PostMapping("/codes/search")
   public ApiResponse searchByPost(
@@ -147,12 +143,12 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを取得します。
+   * コードマスタを取得します。
    *
    * @param codeId
    * @return
    */
-  @Operation(summary = "コード取得", description = "コードを取得します。")
+  @Operation(summary = "コードマスタ取得", description = "コードマスタを取得します。")
   @PreAuthorize("hasAuthority('code:read')")
   @GetMapping("/code/{codeId}")
   public ApiResponse findOne(@PathVariable Long codeId) {
@@ -166,13 +162,13 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを更新します。
+   * コードマスタを更新します。
    *
    * @param codeId
    * @param request
    * @return
    */
-  @Operation(summary = "コード更新", description = "コードを更新します。")
+  @Operation(summary = "コードマスタ更新", description = "コードマスタを更新します。")
   @PreAuthorize("hasAuthority('code:save')")
   @PutMapping("/code/{codeId}")
   public ApiResponse update(
@@ -196,12 +192,12 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを一括更新します。
+   * コードマスタを一括更新します。
    *
    * @param requests
    * @return
    */
-  @Operation(summary = "コード一括更新", description = "コードを一括更新します。")
+  @Operation(summary = "コードマスタ一括更新", description = "コードマスタを一括更新します。")
   @PreAuthorize("hasAuthority('code:save')")
   @PutMapping(value = "/codes")
   public ApiResponse updateAll(
@@ -224,12 +220,12 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを削除します。
+   * コードマスタを削除します。
    *
    * @param codeId
    * @return
    */
-  @Operation(summary = "コード削除", description = "コードを削除します。")
+  @Operation(summary = "コードマスタ削除", description = "コードマスタを削除します。")
   @PreAuthorize("hasAuthority('code:save')")
   @DeleteMapping("/code/{codeId}")
   public ApiResponse delete(@PathVariable Long codeId) {
@@ -243,12 +239,12 @@ public class CodeController extends AbstractRestController {
   }
 
   /**
-   * コードを一括削除します。
+   * コードマスタを一括削除します。
    *
    * @param requests
    * @return
    */
-  @Operation(summary = "コード一括削除", description = "コードを一括削除します。")
+  @Operation(summary = "コードマスタ一括削除", description = "コードマスタを一括削除します。")
   @PreAuthorize("hasAuthority('code:save')")
   @DeleteMapping(value = "/codes")
   public ApiResponse deleteAll(
@@ -274,19 +270,46 @@ public class CodeController extends AbstractRestController {
    * CSV出力
    *
    * @param filename
+   * @param request
+   * @param response
    * @return
    */
-  @Operation(summary = "コードCSV出力", description = "CSVファイルを出力します。")
+  @Operation(summary = "コードマスタCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('code:read')")
   @GetMapping("/codes/export/{filename:.+\\.csv}")
-  public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {
-    val codes = codeService.findAll(new CodeCriteria(), Pageable.unpaged());
+  public void downloadCsv(
+      @PathVariable String filename,
+      @ModelAttribute SearchCodeRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    // ダウンロード時のファイル名をセットする
+    setContentDispositionHeader(response, filename, true);
 
-    // 詰め替える
-    List<CodeCsv> csvList = modelMapper.map(codes.getContent(), toListType(CodeCsv.class));
+    // 入力値から検索条件を作成する
+    val criteria = modelMapper.map(request, CodeCriteria.class);
 
-    val outputStream = CsvUtils.writeCsv(CodeCsv.class, csvList);
-    val resource = new ByteArrayResource(outputStream.toByteArray());
-    return toResponseEntity(resource, filename, true);
+    // CSV出力する
+    try (val outputStream = response.getOutputStream()) {
+      codeService.writeToOutputStream(outputStream, criteria, CodeCsv.class);
+    }
+  }
+
+  /**
+   * CSV出力（POST版）
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "コードマスタCSV出力", description = "CSVファイルを出力します。")
+  @PreAuthorize("hasAuthority('code:read')")
+  @PostMapping("/codes/export/{filename:.+\\.csv}")
+  public void searchByPost(
+      @PathVariable String filename,
+      @RequestBody SearchCodeRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    downloadCsv(filename, request, response);
   }
 }

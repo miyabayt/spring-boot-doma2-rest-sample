@@ -1,13 +1,17 @@
 package com.bigtreetc.sample.doma.domain.service;
 
 import com.bigtreetc.sample.doma.base.domain.service.BaseTransactionalService;
+import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.domain.model.Permission;
 import com.bigtreetc.sample.doma.domain.model.PermissionCriteria;
 import com.bigtreetc.sample.doma.domain.repository.PermissionRepository;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +26,7 @@ public class PermissionService extends BaseTransactionalService {
   @NonNull final PermissionRepository permissionRepository;
 
   /**
-   * 権限を複数取得します。
+   * 権限マスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -35,7 +39,7 @@ public class PermissionService extends BaseTransactionalService {
   }
 
   /**
-   * 権限を取得します。
+   * 権限マスタを取得します。
    *
    * @return
    */
@@ -46,7 +50,7 @@ public class PermissionService extends BaseTransactionalService {
   }
 
   /**
-   * 権限を取得します。
+   * 権限マスタを取得します。
    *
    * @return
    */
@@ -57,7 +61,7 @@ public class PermissionService extends BaseTransactionalService {
   }
 
   /**
-   * 権限を登録します。
+   * 権限マスタを登録します。
    *
    * @param inputPermission
    * @return
@@ -68,7 +72,7 @@ public class PermissionService extends BaseTransactionalService {
   }
 
   /**
-   * 権限を一括登録します。
+   * 権限マスタを一括登録します。
    *
    * @param permissions
    * @return
@@ -79,7 +83,7 @@ public class PermissionService extends BaseTransactionalService {
   }
 
   /**
-   * 権限を更新します。
+   * 権限マスタを更新します。
    *
    * @param inputPermission
    * @return
@@ -90,7 +94,7 @@ public class PermissionService extends BaseTransactionalService {
   }
 
   /**
-   * 権限を一括更新します。
+   * 権限マスタを一括更新します。
    *
    * @param permissions
    * @return
@@ -101,7 +105,7 @@ public class PermissionService extends BaseTransactionalService {
   }
 
   /**
-   * 権限を削除します。
+   * 権限マスタを削除します。
    *
    * @return
    */
@@ -111,7 +115,7 @@ public class PermissionService extends BaseTransactionalService {
   }
 
   /**
-   * 権限を一括削除します。
+   * 権限マスタを一括削除します。
    *
    * @param permissions
    * @return
@@ -119,5 +123,22 @@ public class PermissionService extends BaseTransactionalService {
   public int deleteAll(final List<Permission> permissions) {
     Assert.notNull(permissions, "permission must not be null");
     return permissionRepository.deleteAll(permissions);
+  }
+
+  /**
+   * 権限マスタを書き出します。
+   *
+   * @param outputStream
+   * @param
+   * @return
+   */
+  @Transactional(readOnly = true) // 読み取りのみの場合は指定する
+  public void writeToOutputStream(
+      OutputStream outputStream, PermissionCriteria criteria, Class<?> clazz) throws IOException {
+    Assert.notNull(criteria, "criteria must not be null");
+    try (val data = permissionRepository.findAll(criteria)) {
+      CsvUtils.writeCsv(
+          outputStream, clazz, data, permission -> modelMapper.map(permission, clazz));
+    }
   }
 }

@@ -5,16 +5,18 @@ import com.bigtreetc.sample.doma.domain.model.PermissionCriteria;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 import org.seasar.doma.*;
 import org.seasar.doma.boot.ConfigAutowireable;
 import org.seasar.doma.jdbc.SelectOptions;
+import org.seasar.doma.message.Message;
 
 @ConfigAutowireable
 @Dao
 public interface PermissionDao {
 
   /**
-   * 権限を取得します。
+   * 権限マスタを検索します。
    *
    * @param criteria
    * @param options
@@ -27,7 +29,17 @@ public interface PermissionDao {
       final Collector<Permission, ?, R> collector);
 
   /**
-   * 権限を1件取得します。
+   * 権限マスタを検索します。
+   *
+   * @param criteria
+   * @return
+   */
+  @Select
+  @Suppress(messages = {Message.DOMA4274})
+  Stream<Permission> selectAll(final PermissionCriteria criteria);
+
+  /**
+   * 権限マスタを1件取得します。
    *
    * @param id
    * @return
@@ -36,7 +48,7 @@ public interface PermissionDao {
   Optional<Permission> selectById(Long id);
 
   /**
-   * 権限を1件取得します。
+   * 権限マスタを1件取得します。
    *
    * @param criteria
    * @return
@@ -45,7 +57,7 @@ public interface PermissionDao {
   Optional<Permission> select(PermissionCriteria criteria);
 
   /**
-   * 権限を登録します。
+   * 権限マスタを登録します。
    *
    * @param permission
    * @return
@@ -54,7 +66,7 @@ public interface PermissionDao {
   int insert(Permission permission);
 
   /**
-   * 権限を更新します。
+   * 権限マスタを更新します。
    *
    * @param permission
    * @return
@@ -63,7 +75,7 @@ public interface PermissionDao {
   int update(Permission permission);
 
   /**
-   * 権限を削除します。
+   * 権限マスタを削除します。
    *
    * @param permission
    * @return
@@ -72,7 +84,7 @@ public interface PermissionDao {
   int delete(Permission permission);
 
   /**
-   * 権限を一括登録します。
+   * 権限マスタを一括登録します。
    *
    * @param permissions
    * @return
@@ -81,7 +93,7 @@ public interface PermissionDao {
   int[] insert(List<Permission> permissions);
 
   /**
-   * 権限を一括更新します。
+   * 権限マスタを一括更新します。
    *
    * @param permissions
    * @return
@@ -90,7 +102,7 @@ public interface PermissionDao {
   int[] update(List<Permission> permissions);
 
   /**
-   * 権限を一括削除します。
+   * 権限マスタを一括削除します。
    *
    * @param permissions
    * @return

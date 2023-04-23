@@ -1,13 +1,17 @@
 package com.bigtreetc.sample.doma.domain.service;
 
 import com.bigtreetc.sample.doma.base.domain.service.BaseTransactionalService;
+import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.domain.model.Holiday;
 import com.bigtreetc.sample.doma.domain.model.HolidayCriteria;
 import com.bigtreetc.sample.doma.domain.repository.HolidayRepository;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +26,7 @@ public class HolidayService extends BaseTransactionalService {
   @NonNull final HolidayRepository holidayRepository;
 
   /**
-   * 祝日を複数取得します。
+   * 祝日マスタを検索します。
    *
    * @param criteria
    * @param pageable
@@ -35,7 +39,7 @@ public class HolidayService extends BaseTransactionalService {
   }
 
   /**
-   * 祝日を取得します。
+   * 祝日マスタを取得します。
    *
    * @return
    */
@@ -46,7 +50,7 @@ public class HolidayService extends BaseTransactionalService {
   }
 
   /**
-   * 祝日を取得します。
+   * 祝日マスタを取得します。
    *
    * @return
    */
@@ -57,7 +61,7 @@ public class HolidayService extends BaseTransactionalService {
   }
 
   /**
-   * 祝日を登録します。
+   * 祝日マスタを登録します。
    *
    * @param inputHoliday
    * @return
@@ -68,7 +72,7 @@ public class HolidayService extends BaseTransactionalService {
   }
 
   /**
-   * コードを一括登録します。
+   * コードマスタを一括登録します。
    *
    * @param holidays
    * @return
@@ -79,7 +83,7 @@ public class HolidayService extends BaseTransactionalService {
   }
 
   /**
-   * 祝日を更新します。
+   * 祝日マスタを更新します。
    *
    * @param inputHoliday
    * @return
@@ -90,7 +94,7 @@ public class HolidayService extends BaseTransactionalService {
   }
 
   /**
-   * コードを一括更新します。
+   * コードマスタを一括更新します。
    *
    * @param holidays
    * @return
@@ -101,7 +105,7 @@ public class HolidayService extends BaseTransactionalService {
   }
 
   /**
-   * 祝日を削除します。
+   * 祝日マスタを削除します。
    *
    * @return
    */
@@ -111,7 +115,7 @@ public class HolidayService extends BaseTransactionalService {
   }
 
   /**
-   * コードを一括削除します。
+   * 祝日マスタを一括削除します。
    *
    * @param holidays
    * @return
@@ -119,5 +123,21 @@ public class HolidayService extends BaseTransactionalService {
   public int deleteAll(final List<Holiday> holidays) {
     Assert.notNull(holidays, "holiday must not be null");
     return holidayRepository.deleteAll(holidays);
+  }
+
+  /**
+   * 祝日マスタを書き出します。
+   *
+   * @param outputStream
+   * @param
+   * @return
+   */
+  @Transactional(readOnly = true) // 読み取りのみの場合は指定する
+  public void writeToOutputStream(
+      OutputStream outputStream, HolidayCriteria criteria, Class<?> clazz) throws IOException {
+    Assert.notNull(criteria, "criteria must not be null");
+    try (val data = holidayRepository.findAll(criteria)) {
+      CsvUtils.writeCsv(outputStream, clazz, data, holiday -> modelMapper.map(holiday, clazz));
+    }
   }
 }

@@ -1,11 +1,9 @@
 package com.bigtreetc.sample.doma.controller.staffs;
 
-import static com.bigtreetc.sample.doma.base.util.TypeUtils.toListType;
 import static com.bigtreetc.sample.doma.base.util.ValidateUtils.isNotEmpty;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
-import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
@@ -18,17 +16,15 @@ import com.bigtreetc.sample.doma.domain.service.StaffService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.Errors;
@@ -55,7 +51,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を登録します。
+   * 担当者マスタを登録します。
    *
    * @param request
    * @return
@@ -86,7 +82,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を一括登録します。
+   * 担当者マスタを一括登録します。
    *
    * @param requests
    * @return
@@ -114,7 +110,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を検索します。
+   * 担当者マスタを検索します。
    *
    * @param request
    * @param pageable
@@ -139,7 +135,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を検索します。（POST版）
+   * 担当者マスタを検索します。（POST版）
    *
    * @param request
    * @param pageable
@@ -155,7 +151,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を取得します。
+   * 担当者マスタを取得します。
    *
    * @param staffId
    * @return
@@ -174,7 +170,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を更新します。
+   * 担当者マスタを更新します。
    *
    * @param staffId
    * @param request
@@ -209,7 +205,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を一括更新します。
+   * 担当者マスタを一括更新します。
    *
    * @param requests
    * @return
@@ -237,7 +233,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を削除します。
+   * 担当者マスタを削除します。
    *
    * @param staffId
    * @return
@@ -256,7 +252,7 @@ public class StaffController extends AbstractRestController {
   }
 
   /**
-   * 担当者を一括削除します。
+   * 担当者マスタを一括削除します。
    *
    * @param requests
    * @return
@@ -287,19 +283,46 @@ public class StaffController extends AbstractRestController {
    * CSV出力
    *
    * @param filename
+   * @param request
+   * @param response
    * @return
    */
   @Operation(summary = "担当者マスタCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('staff:read')")
   @GetMapping("/staffs/export/{filename:.+\\.csv}")
-  public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {
-    val staffs = staffService.findAll(new StaffCriteria(), Pageable.unpaged());
+  public void downloadCsv(
+      @PathVariable String filename,
+      @ModelAttribute SearchStaffRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    // ダウンロード時のファイル名をセットする
+    setContentDispositionHeader(response, filename, true);
 
-    // 詰め替える
-    List<StaffCsv> csvList = modelMapper.map(staffs.getContent(), toListType(StaffCsv.class));
+    // 入力値から検索条件を作成する
+    val criteria = modelMapper.map(request, StaffCriteria.class);
 
-    val outputStream = CsvUtils.writeCsv(StaffCsv.class, csvList);
-    val resource = new ByteArrayResource(outputStream.toByteArray());
-    return toResponseEntity(resource, filename, true);
+    // CSV出力する
+    try (val outputStream = response.getOutputStream()) {
+      staffService.writeToOutputStream(outputStream, criteria, StaffCsv.class);
+    }
+  }
+
+  /**
+   * CSV出力（POST版）
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "担当者マスタCSV出力", description = "CSVファイルを出力します。")
+  @PreAuthorize("hasAuthority('staff:read')")
+  @PostMapping("/staffs/export/{filename:.+\\.csv}")
+  public void searchByPost(
+      @PathVariable String filename,
+      @RequestBody SearchStaffRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    downloadCsv(filename, request, response);
   }
 }

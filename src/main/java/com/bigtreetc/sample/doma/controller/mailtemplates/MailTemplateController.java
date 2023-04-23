@@ -1,10 +1,8 @@
 package com.bigtreetc.sample.doma.controller.mailtemplates;
 
-import static com.bigtreetc.sample.doma.base.util.TypeUtils.toListType;
 import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
-import com.bigtreetc.sample.doma.base.util.CsvUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
@@ -17,17 +15,15 @@ import com.bigtreetc.sample.doma.domain.service.MailTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -43,7 +39,7 @@ public class MailTemplateController extends AbstractRestController {
 
   @NonNull final MailTemplateRequestValidator mailTemplatesRequestValidator;
 
-  @NonNull final MailTemplateService mailTemplatesService;
+  @NonNull final MailTemplateService mailTemplateService;
 
   @InitBinder
   public void validatorBinder(WebDataBinder binder) {
@@ -69,7 +65,7 @@ public class MailTemplateController extends AbstractRestController {
     val mailTemplates = modelMapper.map(request, MailTemplate.class);
 
     // 1件登録する
-    val data = mailTemplatesService.create(mailTemplates);
+    val data = mailTemplateService.create(mailTemplates);
 
     val response = new SimpleApiResponseImpl();
     response.success(data);
@@ -97,7 +93,7 @@ public class MailTemplateController extends AbstractRestController {
     val mailTemplates = requests.stream().map(f -> modelMapper.map(f, MailTemplate.class)).toList();
 
     // 一括登録する
-    val created = mailTemplatesService.createAll(mailTemplates);
+    val created = mailTemplateService.createAll(mailTemplates);
 
     val response = new CountApiResponseImpl();
     response.success(created);
@@ -123,7 +119,7 @@ public class MailTemplateController extends AbstractRestController {
     val criteria = modelMapper.map(request, MailTemplateCriteria.class);
 
     // 10件で区切って取得する
-    val data = mailTemplatesService.findAll(criteria, pageable);
+    val data = mailTemplateService.findAll(criteria, pageable);
 
     val response = new PageableApiResponseImpl();
     response.success(data);
@@ -158,7 +154,7 @@ public class MailTemplateController extends AbstractRestController {
   @GetMapping("/mailTemplate/{mailTemplateId}")
   public ApiResponse findOne(@PathVariable Long mailTemplateId) {
     // 1件取得する
-    val data = mailTemplatesService.findById(mailTemplateId);
+    val data = mailTemplateService.findById(mailTemplateId);
 
     val response = new SimpleApiResponseImpl();
     response.success(data);
@@ -190,7 +186,7 @@ public class MailTemplateController extends AbstractRestController {
 
     // 1件更新する
     mailTemplates.setId(mailTemplateId);
-    val data = mailTemplatesService.update(mailTemplates);
+    val data = mailTemplateService.update(mailTemplates);
 
     val response = new SimpleApiResponseImpl();
     response.success(data);
@@ -219,7 +215,7 @@ public class MailTemplateController extends AbstractRestController {
         requests.stream().map(f -> modelMapper.map(f, MailTemplate.class)).collect(toList());
 
     // 一括更新する
-    val updated = mailTemplatesService.updateAll(mailTemplates);
+    val updated = mailTemplateService.updateAll(mailTemplates);
 
     val response = new CountApiResponseImpl();
     response.success(updated);
@@ -238,7 +234,7 @@ public class MailTemplateController extends AbstractRestController {
   @DeleteMapping("/mailTemplate/{mailTemplateId}")
   public ApiResponse delete(@PathVariable Long mailTemplateId) {
     // 1件取得する
-    val data = mailTemplatesService.delete(mailTemplateId);
+    val data = mailTemplateService.delete(mailTemplateId);
 
     val response = new SimpleApiResponseImpl();
     response.success(data);
@@ -267,7 +263,7 @@ public class MailTemplateController extends AbstractRestController {
         requests.stream().map(f -> modelMapper.map(f, MailTemplate.class)).collect(toList());
 
     // 一括削除する
-    val deleted = mailTemplatesService.deleteAll(mailTemplates);
+    val deleted = mailTemplateService.deleteAll(mailTemplates);
 
     val response = new CountApiResponseImpl();
     response.success(deleted);
@@ -279,21 +275,46 @@ public class MailTemplateController extends AbstractRestController {
    * CSV出力
    *
    * @param filename
+   * @param request
+   * @param response
    * @return
    */
   @Operation(summary = "メールテンプレートCSV出力", description = "CSVファイルを出力します。")
   @PreAuthorize("hasAuthority('mailTemplate:read')")
   @GetMapping("/mailTemplates/export/{filename:.+\\.csv}")
-  public ResponseEntity<Resource> downloadCsv(@PathVariable String filename) throws Exception {
-    val mailTemplates =
-        mailTemplatesService.findAll(new MailTemplateCriteria(), Pageable.unpaged());
+  public void downloadCsv(
+      @PathVariable String filename,
+      @ModelAttribute SearchMailTemplateRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    // ダウンロード時のファイル名をセットする
+    setContentDispositionHeader(response, filename, true);
 
-    // 詰め替える
-    List<MailTemplateCsv> csvList =
-        modelMapper.map(mailTemplates.getContent(), toListType(MailTemplateCsv.class));
+    // 入力値から検索条件を作成する
+    val criteria = modelMapper.map(request, MailTemplateCriteria.class);
 
-    val outputStream = CsvUtils.writeCsv(MailTemplateCsv.class, csvList);
-    val resource = new ByteArrayResource(outputStream.toByteArray());
-    return toResponseEntity(resource, filename, true);
+    // CSV出力する
+    try (val outputStream = response.getOutputStream()) {
+      mailTemplateService.writeToOutputStream(outputStream, criteria, MailTemplateCsv.class);
+    }
+  }
+
+  /**
+   * CSV出力（POST版）
+   *
+   * @param request
+   * @param response
+   * @return
+   */
+  @PageableAsQueryParam
+  @Operation(summary = "メールテンプレートCSV出力", description = "CSVファイルを出力します。")
+  @PreAuthorize("hasAuthority('mailTemplate:read')")
+  @PostMapping("/mailTemplates/export/{filename:.+\\.csv}")
+  public void searchByPost(
+      @PathVariable String filename,
+      @RequestBody SearchMailTemplateRequest request,
+      HttpServletResponse response)
+      throws IOException {
+    downloadCsv(filename, request, response);
   }
 }
