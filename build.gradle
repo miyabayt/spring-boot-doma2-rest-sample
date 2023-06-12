@@ -3,7 +3,7 @@ plugins {
     id "idea"
     id "org.springframework.boot" version "${springBootVersion}"
     id "org.domaframework.doma.compile" version "2.0.0"
-    id "com.google.cloud.tools.jib" version "3.3.0"
+    id "com.google.cloud.tools.jib" version "3.3.2"
     id "org.eclipse.jkube.kubernetes" version "${jkubeVersion}"
     id "com.diffplug.spotless" version "${spotlessVersion}"
     id "jacoco"
