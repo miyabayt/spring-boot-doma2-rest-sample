@@ -14,9 +14,6 @@
 ### Build
 
 ```bash
-$ # start mysql/redis/mock smtp server
-$ ./gradlew composeUp
-
 $ # run spring boot app
 $ ./gradlew bootRun
 
