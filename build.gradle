@@ -2,10 +2,13 @@ plugins {
     id "java"
     id "idea"
     id "org.springframework.boot" version "${springBootVersion}"
+    id "org.owasp.dependencycheck" version "9.0.7"
     id "org.domaframework.doma.compile" version "2.0.0"
-    id "com.google.cloud.tools.jib" version "3.3.2"
+    id "com.google.cloud.tools.jib" version "3.4.0"
+    id "com.avast.gradle.docker-compose" version "0.17.5"
     id "org.eclipse.jkube.kubernetes" version "${jkubeVersion}"
-    id "com.diffplug.spotless" version "${spotlessVersion}"
+    id "com.diffplug.spotless" version "6.23.3"
+    id "com.github.ben-manes.versions" version "0.50.0"
     id "jacoco"
 }
 
@@ -43,7 +46,12 @@ spotless {
 
 sourceCompatibility = "17"
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
-[compileJava, compileTestJava]*.options*.compilerArgs = ["-Xlint:all"]
+[compileJava, compileTestJava]*.options*.compilerArgs = ["-parameters", "-Xlint:all"]
+
+project.ext["logback.version"] = "1.4.14"
+project.ext["netty-handler"] = "4.1.101.Final" // CVE-2023-4586 https://github.com/aws/aws-sdk-java-v2/issues/4584
+project.ext["jackson-bom.version"] = "2.16.0"
+project.ext["mysql.version"] = "8.2.0"
 
 dependencies {
     compileOnly "org.projectlombok:lombok"
@@ -59,23 +67,25 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-json"
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "org.springframework.boot:spring-boot-starter-data-redis"
+    implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
+
     developmentOnly "org.springframework.boot:spring-boot-devtools"
-    developmentOnly "org.springframework.boot:spring-boot-docker-compose"
+    // developmentOnly "org.springframework.boot:spring-boot-docker-compose"
 
     implementation "org.springframework.data:spring-data-commons"
-    implementation "org.seasar.doma.boot:doma-spring-boot-starter:${domaSpringBootVersion}"
-    implementation "org.seasar.doma:doma-core:${domaVersion}"
-    implementation "org.seasar.doma:doma-slf4j:${domaVersion}"
-    annotationProcessor "org.seasar.doma:doma-processor:${domaVersion}"
+    implementation "org.seasar.doma.boot:doma-spring-boot-starter:1.7.0"
+    implementation "org.seasar.doma:doma-core:2.54.2"
+    implementation "org.seasar.doma:doma-slf4j:2.54.2"
+    annotationProcessor "org.seasar.doma:doma-processor:2.54.2"
 
     implementation "com.fasterxml.jackson.module:jackson-module-parameter-names"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv"
 
-    implementation 'org.modelmapper:modelmapper:3.1.1'
+    implementation "org.modelmapper:modelmapper:3.2.0"
     implementation "com.auth0:java-jwt:4.4.0"
-    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0"
 
     implementation "org.flywaydb:flyway-core"
     implementation "org.flywaydb:flyway-mysql"
@@ -86,7 +96,7 @@ dependencies {
     testImplementation "org.springframework.security:spring-security-test"
     testImplementation "com.h2database:h2"
 
-    testImplementation "org.flywaydb.flyway-test-extensions:flyway-spring-test:7.0.0"
+    testImplementation "org.flywaydb.flyway-test-extensions:flyway-spring-test:9.5.0"
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
     testImplementation "org.testcontainers:junit-jupiter"
     testImplementation "org.testcontainers:mysql"
