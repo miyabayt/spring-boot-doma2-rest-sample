@@ -64,6 +64,7 @@ public class ApiConfig implements WebMvcConfigurer {
     val modelMapper = new ModelMapper();
     val configuration = modelMapper.getConfiguration();
     configuration.setMatchingStrategy(MatchingStrategies.STRICT); // 厳格にマッピングする
+    configuration.setFullTypeMatchingRequired(true);
     return modelMapper;
   }
 

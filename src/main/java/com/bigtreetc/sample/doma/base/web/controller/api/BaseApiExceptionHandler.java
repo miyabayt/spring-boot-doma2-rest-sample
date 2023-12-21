@@ -161,7 +161,7 @@ public class BaseApiExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<Object> handleAccessDeniedException(Exception ex, WebRequest request) {
     val headers = new HttpHeaders();
-    val status = HttpStatus.UNAUTHORIZED;
+    val status = HttpStatus.FORBIDDEN;
     val message =
         MessageUtils.getMessage(ACCESS_DENIED_ERROR, null, "access denied", request.getLocale());
 

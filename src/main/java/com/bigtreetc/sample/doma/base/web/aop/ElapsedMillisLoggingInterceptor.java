@@ -42,7 +42,6 @@ public class ElapsedMillisLoggingInterceptor implements HandlerInterceptor {
       HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
       throws Exception {
     // 処理完了後
-
     val beforeNanoSec = startTimeHolder.get();
     if (beforeNanoSec == null) {
       return;
