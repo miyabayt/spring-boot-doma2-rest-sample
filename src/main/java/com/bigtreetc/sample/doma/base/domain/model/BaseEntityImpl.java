@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import org.seasar.doma.Column;
 import org.seasar.doma.Entity;
 import org.seasar.doma.Version;
 
@@ -16,9 +17,12 @@ import org.seasar.doma.Version;
 public abstract class BaseEntityImpl implements BaseEntity, Serializable {
 
   // 作成者
-  @JsonIgnore String createdBy;
+  @Column(updatable = false)
+  @JsonIgnore
+  String createdBy;
 
   // 作成日時
+  @Column(updatable = false)
   LocalDateTime createdAt;
 
   // 更新者
