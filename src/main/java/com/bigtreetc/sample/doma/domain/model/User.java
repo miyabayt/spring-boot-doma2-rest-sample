@@ -46,4 +46,7 @@ public class User extends BaseEntityImpl {
 
   // 住所
   @NotEmpty String address;
+
+  // 添付ファイルID
+  Long uploadFileId;
 }
