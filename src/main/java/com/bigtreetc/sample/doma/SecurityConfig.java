@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,7 +44,7 @@ public class SecurityConfig {
   @Autowired AppSecurityConfig securityConfig;
 
   @Bean
-  public CorsFilter corsFilter(CorsProperties corsProperties) {
+  public FilterRegistrationBean<CorsFilter> corsFilter(CorsProperties corsProperties) {
     val corsConfig = new CorsConfiguration();
     corsConfig.setAllowCredentials(corsProperties.getAllowCredentials());
     corsConfig.setAllowedHeaders(corsProperties.getAllowedHeaders());
@@ -53,7 +55,10 @@ public class SecurityConfig {
 
     val source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", corsConfig);
-    return new CorsFilter(source);
+
+    val bean = new FilterRegistrationBean<>(new CorsFilter(source));
+    bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+    return bean;
   }
 
   @Bean
