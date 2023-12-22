@@ -59,6 +59,7 @@ public class ElapsedMillisLoggingInterceptor implements HandlerInterceptor {
 
     // 破棄する
     startTimeHolder.remove();
+    requestUriHolder.remove();
   }
 
   private String getRequestURI(HttpServletRequest request) {
