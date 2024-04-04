@@ -1,5 +1,6 @@
 package com.bigtreetc.sample.doma;
 
+import com.bigtreetc.sample.doma.base.domain.model.BaseEntity;
 import com.bigtreetc.sample.doma.base.util.MessageUtils;
 import com.bigtreetc.sample.doma.base.web.aop.ElapsedMillisLoggingInterceptor;
 import com.bigtreetc.sample.doma.base.web.aop.SetAuditInfoInterceptor;
@@ -63,6 +64,22 @@ public class ApiConfig implements WebMvcConfigurer {
   public ModelMapper modelMapper() {
     val modelMapper = new ModelMapper();
     val configuration = modelMapper.getConfiguration();
+    configuration.setPropertyCondition(
+        context -> {
+          // IDとAuditカラムは上書きしないようにする
+          val propertyInfo = context.getMapping().getLastDestinationProperty();
+          val propertyName = propertyInfo.getName();
+          val destination = context.getParent().getDestination();
+          if (destination instanceof BaseEntity) {
+            switch (propertyName) {
+              case "id", "createdBy", "createdAt", "updatedBy", "updatedAt" -> {
+                return false;
+              }
+            }
+          }
+          return true;
+        });
+
     configuration.setMatchingStrategy(MatchingStrategies.STRICT); // 厳格にマッピングする
     configuration.setFullTypeMatchingRequired(true);
     return modelMapper;
