@@ -22,9 +22,6 @@ public class Code extends BaseEntityImpl {
   // 分類コード
   String categoryCode;
 
-  // コード分類名
-  String categoryName;
-
   // コード値
   String codeValue;
 

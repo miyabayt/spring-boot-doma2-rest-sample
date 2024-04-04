@@ -1,28 +1,15 @@
 SELECT
-    c.code_id
-    ,cc.category_code
-    ,cc.category_name
-    ,c.code_name
-    ,c.code_value
-    ,c.code_alias
-    ,c.display_order
-    ,c.created_by
-    ,c.created_at
-    ,c.updated_by
-    ,c.updated_at
-    ,c.version
+    /*%expand*/*
 FROM
-    codes c
-INNER JOIN code_categories cc
-ON c.category_code = cc.category_code
+    codes
 WHERE
 /*%if criteria.id != null */
-AND c.code_id = /* criteria.id */1
+AND code_id = /* criteria.id */1
 /*%end*/
 /*%if criteria.categoryCode != null */
-AND c.category_code = /* criteria.categoryCode */'GNR0001'
+AND category_code = /* criteria.categoryCode */'GNR0001'
 /*%end*/
 /*%if criteria.codeValue != null */
-AND c.code_value = /* criteria.codeValue */'01'
+AND code_value = /* criteria.codeValue */'01'
 /*%end*/
-ORDER BY c.code_id ASC, cc.category_code ASC, c.display_order ASC
+ORDER BY code_id ASC, category_code ASC, display_order ASC
