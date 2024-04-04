@@ -74,9 +74,9 @@ dependencies {
 
     implementation "org.springframework.data:spring-data-commons"
     implementation "org.seasar.doma.boot:doma-spring-boot-starter:1.7.0"
-    implementation "org.seasar.doma:doma-core:2.54.2"
-    implementation "org.seasar.doma:doma-slf4j:2.54.2"
-    annotationProcessor "org.seasar.doma:doma-processor:2.54.2"
+    implementation "org.seasar.doma:doma-core:${domaVersion}"
+    implementation "org.seasar.doma:doma-slf4j:${domaVersion}"
+    annotationProcessor "org.seasar.doma:doma-processor:${domaVersion}"
 
     implementation "com.fasterxml.jackson.module:jackson-module-parameter-names"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
