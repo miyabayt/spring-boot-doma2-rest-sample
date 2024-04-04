@@ -7,8 +7,6 @@ INSERT INTO roles (role_code, role_name, created_by, created_at, updated_by, upd
 
 DELETE FROM permissions WHERE created_by = 'init';
 INSERT INTO permissions (permission_code, permission_name, created_by, created_at, updated_by, updated_at) VALUES
-('codeCategory:read', 'コード分類マスタ検索', 'init', NOW(), 'init', NOW()),
-('codeCategory:save', 'コード分類マスタ登録・編集', 'init', NOW(), 'init', NOW()),
 ('code:read', 'コードマスタ検索', 'init', NOW(), 'init', NOW()),
 ('code:save', 'コードマスタ登録・編集', 'init', NOW(), 'init', NOW()),
 ('holiday:read', '祝日マスタ検索', 'init', NOW(), 'init', NOW()),
