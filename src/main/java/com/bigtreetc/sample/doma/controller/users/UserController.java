@@ -1,7 +1,6 @@
 package com.bigtreetc.sample.doma.controller.users;
 
 import static com.bigtreetc.sample.doma.base.util.ValidateUtils.isNotEmpty;
-import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
@@ -222,7 +221,7 @@ public class UserController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val users = requests.stream().map(f -> modelMapper.map(f, User.class)).collect(toList());
+    val users = requests.stream().map(f -> modelMapper.map(f, User.class)).toList();
 
     // 一括更新する
     val updated = userService.updateAll(users);
@@ -269,7 +268,7 @@ public class UserController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val users = requests.stream().map(f -> modelMapper.map(f, User.class)).collect(toList());
+    val users = requests.stream().map(f -> modelMapper.map(f, User.class)).toList();
 
     // 一括削除する
     val deleted = userService.deleteAll(users);

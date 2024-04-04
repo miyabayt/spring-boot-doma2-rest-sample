@@ -1,7 +1,5 @@
 package com.bigtreetc.sample.doma.base.web.security.jwt;
 
-import static java.util.stream.Collectors.toList;
-
 import com.bigtreetc.sample.doma.base.web.controller.api.response.SimpleApiResponseImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -87,7 +85,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     val username = ((User) authResult.getPrincipal()).getUsername();
     val authorities =
-        authResult.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(toList());
+        authResult.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
     // アクセストークン
     val token = repository.createAccessToken(username, authorities);

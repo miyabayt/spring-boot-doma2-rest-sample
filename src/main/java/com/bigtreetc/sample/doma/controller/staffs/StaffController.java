@@ -1,7 +1,6 @@
 package com.bigtreetc.sample.doma.controller.staffs;
 
 import static com.bigtreetc.sample.doma.base.util.ValidateUtils.isNotEmpty;
-import static java.util.stream.Collectors.toList;
 
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
@@ -221,7 +220,7 @@ public class StaffController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val staffs = requests.stream().map(f -> modelMapper.map(f, Staff.class)).collect(toList());
+    val staffs = requests.stream().map(f -> modelMapper.map(f, Staff.class)).toList();
 
     // 一括更新する
     val updated = staffService.updateAll(staffs);
@@ -268,7 +267,7 @@ public class StaffController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val staffs = requests.stream().map(f -> modelMapper.map(f, Staff.class)).collect(toList());
+    val staffs = requests.stream().map(f -> modelMapper.map(f, Staff.class)).toList();
 
     // 一括削除する
     val deleted = staffService.deleteAll(staffs);

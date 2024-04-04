@@ -1,7 +1,5 @@
 package com.bigtreetc.sample.doma.controller.holidays;
 
-import static java.util.stream.Collectors.toList;
-
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
@@ -208,7 +206,7 @@ public class HolidayController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val holidays = requests.stream().map(f -> modelMapper.map(f, Holiday.class)).collect(toList());
+    val holidays = requests.stream().map(f -> modelMapper.map(f, Holiday.class)).toList();
 
     // 一括更新する
     val updated = holidayService.updateAll(holidays);
@@ -255,7 +253,7 @@ public class HolidayController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val holidays = requests.stream().map(f -> modelMapper.map(f, Holiday.class)).collect(toList());
+    val holidays = requests.stream().map(f -> modelMapper.map(f, Holiday.class)).toList();
 
     // 一括削除する
     val deleted = holidayService.deleteAll(holidays);

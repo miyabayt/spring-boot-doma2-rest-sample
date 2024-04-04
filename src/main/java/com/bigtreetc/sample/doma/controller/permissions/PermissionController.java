@@ -1,7 +1,5 @@
 package com.bigtreetc.sample.doma.controller.permissions;
 
-import static java.util.stream.Collectors.toList;
-
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
@@ -222,8 +220,7 @@ public class PermissionController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val permissions =
-        requests.stream().map(f -> modelMapper.map(f, Permission.class)).collect(toList());
+    val permissions = requests.stream().map(f -> modelMapper.map(f, Permission.class)).toList();
 
     // 更新する
     val updated = permissionService.updateAll(permissions);
@@ -271,8 +268,7 @@ public class PermissionController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val permissions =
-        requests.stream().map(f -> modelMapper.map(f, Permission.class)).collect(toList());
+    val permissions = requests.stream().map(f -> modelMapper.map(f, Permission.class)).toList();
 
     // 一括削除する
     val deleted = permissionService.deleteAll(permissions);

@@ -1,7 +1,5 @@
 package com.bigtreetc.sample.doma.controller.codes;
 
-import static java.util.stream.Collectors.toList;
-
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
@@ -208,7 +206,7 @@ public class CodeController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val codes = requests.stream().map(f -> modelMapper.map(f, Code.class)).collect(toList());
+    val codes = requests.stream().map(f -> modelMapper.map(f, Code.class)).toList();
 
     // 一括更新する
     val updated = codeService.updateAll(codes);
@@ -255,7 +253,7 @@ public class CodeController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val codes = requests.stream().map(f -> modelMapper.map(f, Code.class)).collect(toList());
+    val codes = requests.stream().map(f -> modelMapper.map(f, Code.class)).toList();
 
     // 一括削除する
     val deleted = codeService.deleteAll(codes);

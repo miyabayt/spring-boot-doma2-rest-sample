@@ -1,7 +1,5 @@
 package com.bigtreetc.sample.doma.controller.roles;
 
-import static java.util.stream.Collectors.toList;
-
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
@@ -228,7 +226,7 @@ public class RoleController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val roles = requests.stream().map(f -> modelMapper.map(f, Role.class)).collect(toList());
+    val roles = requests.stream().map(f -> modelMapper.map(f, Role.class)).toList();
 
     // 一括更新する
     val updated = roleService.updateAll(roles);
@@ -275,7 +273,7 @@ public class RoleController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val roles = requests.stream().map(f -> modelMapper.map(f, Role.class)).collect(toList());
+    val roles = requests.stream().map(f -> modelMapper.map(f, Role.class)).toList();
 
     // 一括削除する
     val deleted = roleService.deleteAll(roles);

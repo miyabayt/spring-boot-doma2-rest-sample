@@ -1,7 +1,5 @@
 package com.bigtreetc.sample.doma.controller.mailtemplates;
 
-import static java.util.stream.Collectors.toList;
-
 import com.bigtreetc.sample.doma.base.exception.ValidationErrorException;
 import com.bigtreetc.sample.doma.base.web.controller.api.AbstractRestController;
 import com.bigtreetc.sample.doma.base.web.controller.api.request.Requests;
@@ -211,8 +209,7 @@ public class MailTemplateController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val mailTemplates =
-        requests.stream().map(f -> modelMapper.map(f, MailTemplate.class)).collect(toList());
+    val mailTemplates = requests.stream().map(f -> modelMapper.map(f, MailTemplate.class)).toList();
 
     // 一括更新する
     val updated = mailTemplateService.updateAll(mailTemplates);
@@ -259,8 +256,7 @@ public class MailTemplateController extends AbstractRestController {
     }
 
     // 入力値からDTOを作成する
-    val mailTemplates =
-        requests.stream().map(f -> modelMapper.map(f, MailTemplate.class)).collect(toList());
+    val mailTemplates = requests.stream().map(f -> modelMapper.map(f, MailTemplate.class)).toList();
 
     // 一括削除する
     val deleted = mailTemplateService.deleteAll(mailTemplates);
