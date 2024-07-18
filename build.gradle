@@ -112,6 +112,7 @@ tasks.named("test") {
     testLogging {
         events "passed", "skipped", "failed"
     }
+    systemProperty "spring.profiles.active", "test"
 }
 
 compileJava.dependsOn "spotlessApply"

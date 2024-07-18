@@ -1,6 +1,7 @@
 package com.bigtreetc.sample.doma;
 
 import com.bigtreetc.sample.doma.base.domain.model.BaseEntity;
+import com.bigtreetc.sample.doma.base.util.EnvironmentUtils;
 import com.bigtreetc.sample.doma.base.util.MessageUtils;
 import com.bigtreetc.sample.doma.base.web.aop.ElapsedMillisLoggingInterceptor;
 import com.bigtreetc.sample.doma.base.web.aop.SetAuditInfoInterceptor;
@@ -16,6 +17,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.Environment;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -30,8 +32,9 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 public class ApiConfig implements WebMvcConfigurer {
 
   @Autowired
-  public void initUtils(MessageSource messageSource) {
+  public void initUtils(MessageSource messageSource, Environment environment) {
     MessageUtils.init(messageSource);
+    EnvironmentUtils.init(environment);
   }
 
   @Override
