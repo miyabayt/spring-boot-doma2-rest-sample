@@ -1,7 +1,10 @@
 package com.bigtreetc.sample.doma.base.web.security.jwt;
 
-import static com.bigtreetc.sample.doma.base.web.BaseWebConst.UNAUTHORIZED_ERROR;
+import static com.bigtreetc.sample.doma.base.web.BaseWebConst.*;
+import static com.bigtreetc.sample.doma.base.web.security.jwt.JwtConst.REFRESH_TOKEN_CACHE_KEY_PREFIX;
 
+import com.auth0.jwt.JWT;
+import com.bigtreetc.sample.doma.base.util.EnvironmentUtils;
 import com.bigtreetc.sample.doma.base.util.MessageUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ErrorApiResponseImpl;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.SimpleApiResponseImpl;
@@ -10,10 +13,15 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +29,7 @@ import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -49,30 +58,58 @@ public class JwtRefreshFilter extends GenericFilterBean {
     }
 
     Object resource = null;
-    RefreshTokenRequest token = null;
-    String newAccessToken = null;
-    String newRefreshToken = null;
     try {
-      val input = request.getInputStream();
-      token = OBJECT_MAPPER.readValue(input, RefreshTokenRequest.class);
+      val tokenPayload = request.getHeader(JwtConst.HEADER);
+      val accessToken = extractAccessToken(tokenPayload);
+      val jwt = JWT.decode(accessToken);
 
-      val accessToken = token.getAccessToken();
-      val refreshToken = token.getRefreshToken();
+      val username = jwt.getClaim(JwtConst.USERNAME).asString();
+      val authorities = jwt.getClaim(JwtConst.ROLES).asList(String.class);
 
-      val username = repository.getClaimAsString(accessToken, JwtConst.USERNAME);
-      val authorities = repository.getClaimAsList(accessToken, JwtConst.ROLES, String.class);
+      // Cookieで送信されたリフレッシュトークン
+      val refreshToken =
+          getCookieValue(request, COOKIE_REFRESH_TOKEN)
+              .orElseThrow(() -> new InsufficientAuthenticationException("リフレッシュトークンがNULLです。"));
 
-      val valid = repository.verifyRefreshToken(username, refreshToken);
+      // Cookieで送信されたセッションID
+      val sessionId =
+          getCookieValue(request, COOKIE_SESSION_ID)
+              .orElseThrow(() -> new InsufficientAuthenticationException("セッションIDがNULLです。"));
+      val sessionIdKey = REFRESH_TOKEN_CACHE_KEY_PREFIX + username + ":" + sessionId;
+
+      // リフレッシュトークンのキャッシュが存在するか確認する
+      val valid = repository.verifyRefreshToken(sessionIdKey, refreshToken);
       if (!valid) {
         throw new InsufficientAuthenticationException("リフレッシュトークンが不正です。");
       }
 
-      newAccessToken = repository.createAccessToken(username, authorities);
-      newRefreshToken = repository.renewRefreshToken(username, refreshToken);
-
+      // 新しいアクセストークンを払い出す
+      val newAccessToken = repository.createAccessToken(username, authorities);
       val jwtToken = new JwtObject();
       jwtToken.setAccessToken(newAccessToken);
-      jwtToken.setRefreshToken(newRefreshToken);
+
+      // セッションIDの有効期限を延長する
+      val sessionIdCookie =
+          ResponseCookie.from(COOKIE_SESSION_ID, sessionId)
+              .sameSite(COOKIE_SAME_SITE_STRICT)
+              .secure(!EnvironmentUtils.isLocalOrTest())
+              .httpOnly(true)
+              .maxAge(Duration.ofHours(1)) // 1時間
+              .build();
+
+      // リフレッシュトークンを更新する
+      val newRefreshToken = repository.renewRefreshToken(sessionIdKey);
+      val refreshTokenCookie =
+          ResponseCookie.from(COOKIE_REFRESH_TOKEN, newRefreshToken)
+              .sameSite(COOKIE_SAME_SITE_STRICT)
+              .secure(!EnvironmentUtils.isLocalOrTest())
+              .httpOnly(true)
+              .maxAge(Duration.ofHours(1)) // 1時間
+              .build();
+
+      // Cookieヘッダを追加する
+      response.addHeader(HttpHeaders.SET_COOKIE, sessionIdCookie.toString());
+      response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
       val simpleResource = new SimpleApiResponseImpl();
       simpleResource.success(jwtToken);
@@ -96,8 +133,22 @@ public class JwtRefreshFilter extends GenericFilterBean {
     }
   }
 
-  protected boolean requiresAuthentication(
-      HttpServletRequest request, HttpServletResponse response) {
+  private Optional<String> getCookieValue(HttpServletRequest request, String name) {
+    return Arrays.stream(request.getCookies())
+        .filter(cookie -> Objects.equals(name, cookie.getName()))
+        .map(Cookie::getValue)
+        .findAny();
+  }
+
+  private static String extractAccessToken(String tokenPayload) {
+    try {
+      return tokenPayload.substring(7);
+    } catch (Exception e) {
+      return tokenPayload;
+    }
+  }
+
+  private boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
     return requiresAuthenticationRequestMatcher.matches(request);
   }
 }

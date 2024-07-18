@@ -14,9 +14,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Getter
@@ -56,16 +53,16 @@ public class JwtRepository {
   /**
    * リフレッシュトークンを返します。
    *
-   * @param username
+   * @param key
    * @return
    */
-  public String createRefreshToken(String username) {
+  public String createRefreshToken(String key) {
     val refreshToken = RandomStringUtils.randomAlphanumeric(256);
-    redisTemplate.opsForValue().set(refreshToken, username);
-    redisTemplate.expire(refreshToken, refreshTokenTimeoutHours, TimeUnit.HOURS);
+    redisTemplate.opsForValue().set(key, refreshToken);
+    redisTemplate.expire(key, refreshTokenTimeoutHours, TimeUnit.HOURS);
 
     if (log.isDebugEnabled()) {
-      log.debug("refresh token has stored. [username={}, refreshToken={}]", username, refreshToken);
+      log.debug("refresh token has stored. [key={}, refreshToken={}]", key, refreshToken);
     }
 
     return refreshToken;
@@ -74,14 +71,14 @@ public class JwtRepository {
   /**
    * リフレッシュトークンを検証します。
    *
-   * @param username
+   * @param key
    * @param refreshToken
    * @return
    */
-  public boolean verifyRefreshToken(String username, String refreshToken) {
-    val value = redisTemplate.opsForValue().get(refreshToken);
-    if (!Objects.equals(username, value)) {
-      log.warn("invalid refresh token. username={}", username);
+  public boolean verifyRefreshToken(String key, String refreshToken) {
+    val value = redisTemplate.opsForValue().get(key);
+    if (!Objects.equals(refreshToken, value)) {
+      log.warn("invalid refresh token. key={}", key);
       return false;
     }
 
@@ -91,30 +88,17 @@ public class JwtRepository {
   /**
    * リフレッシュトークンを再発行します。
    *
-   * @param username
-   * @param refreshToken
+   * @param key
    * @return
    */
-  public String renewRefreshToken(String username, String refreshToken) {
+  public String renewRefreshToken(String key) {
     val newRefreshToken = RandomStringUtils.randomAlphanumeric(256);
 
-    redisTemplate.execute(
-        new SessionCallback<List<Object>>() {
-          @SuppressWarnings("unchecked")
-          @Override
-          public <K, V> List<Object> execute(RedisOperations<K, V> operations)
-              throws DataAccessException {
-            operations.multi();
-            operations.delete((K) refreshToken);
-            operations.opsForValue().set((K) newRefreshToken, (V) username);
-            operations.expire((K) newRefreshToken, refreshTokenTimeoutHours, TimeUnit.HOURS);
-            return operations.exec();
-          }
-        });
+    redisTemplate.opsForValue().set(key, newRefreshToken);
+    redisTemplate.expire(key, refreshTokenTimeoutHours, TimeUnit.HOURS);
 
     if (log.isDebugEnabled()) {
-      log.debug(
-          "refresh token has renewed. [username={}, refreshToken={}]", username, newRefreshToken);
+      log.debug("refresh token has renewed. [key={}, refreshToken={}]", key, newRefreshToken);
     }
 
     return newRefreshToken;
@@ -155,19 +139,16 @@ public class JwtRepository {
   /**
    * リフレッシュトークンを削除します。
    *
-   * @param accessToken
-   * @param refreshToken
+   * @param key
    * @return
    */
-  public boolean deleteRefreshToken(String accessToken, String refreshToken) {
-    val expectedUsername = redisTemplate.opsForValue().get(refreshToken);
-    val actualUsername = getClaimAsString(accessToken, JwtConst.USERNAME);
-
-    if (Objects.equals(expectedUsername, actualUsername)) {
-      val success = redisTemplate.delete(refreshToken);
-      return Boolean.TRUE.equals(success);
+  public boolean deleteRefreshToken(String key) {
+    try {
+      redisTemplate.delete(key);
+    } catch (Exception e) {
+      // ignore
     }
-    return false;
+    return true;
   }
 
   /**

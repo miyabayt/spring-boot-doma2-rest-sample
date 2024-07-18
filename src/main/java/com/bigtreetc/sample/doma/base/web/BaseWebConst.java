@@ -41,4 +41,14 @@ public interface BaseWebConst {
 
   /** ---- Security ---- */
   String PERMIT_ALL = "permitAll";
+
+  /** ---- Headers ---- */
+  String HEADER_X_TRACK_ID = "X-Track-Id";
+
+  /** ---- Cookies ---- */
+  String COOKIE_SESSION_ID = "SESSION";
+
+  String COOKIE_REFRESH_TOKEN = "refresh_token";
+
+  String COOKIE_SAME_SITE_STRICT = "Strict";
 }

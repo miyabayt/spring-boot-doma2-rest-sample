@@ -1,9 +1,10 @@
 package com.bigtreetc.sample.doma.controller.auth;
 
+import static com.bigtreetc.sample.doma.base.web.security.jwt.JwtConst.REFRESH_TOKEN_CACHE_KEY_PREFIX;
+
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ApiResponse;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.SimpleApiResponseImpl;
 import com.bigtreetc.sample.doma.base.web.security.jwt.JwtRepository;
-import com.bigtreetc.sample.doma.base.web.security.jwt.RefreshTokenRequest;
 import com.bigtreetc.sample.doma.base.web.util.WebSecurityUtils;
 import com.bigtreetc.sample.doma.domain.repository.StaffRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,14 +13,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "認証")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping(path = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/api/auth")
 @Slf4j
 public class AuthController {
 
@@ -52,18 +52,26 @@ public class AuthController {
   /**
    * ログアウトします。
    *
-   * @param request
    * @return
    */
   @PostMapping("/logout")
-  public ApiResponse logout(@RequestBody RefreshTokenRequest request) {
-    val accessToken = request.getAccessToken();
-    val refreshToken = request.getRefreshToken();
-    val success = jwtRepository.deleteRefreshToken(accessToken, refreshToken);
+  public ApiResponse logout(@CookieValue(name = "SESSION", required = false) String sessionId) {
+    // ログインユーザを取得する
+    val accountId =
+        WebSecurityUtils.getPrincipal()
+            .orElseThrow(() -> new AuthenticationServiceException("認証エラー"));
 
-    val response = new SimpleApiResponseImpl();
-    response.setSuccess(success);
+    if (sessionId != null) {
+      val sessionIdKey = REFRESH_TOKEN_CACHE_KEY_PREFIX + ":" + accountId + ":" + sessionId;
+      jwtRepository.deleteRefreshToken(sessionIdKey);
 
-    return response;
+      val response = new SimpleApiResponseImpl();
+      response.success();
+      return response;
+    } else {
+      val response = new SimpleApiResponseImpl();
+      response.setMessage("セッションIDを指定してください");
+      return response;
+    }
   }
 }

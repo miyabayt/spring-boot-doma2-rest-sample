@@ -9,4 +9,6 @@ public interface JwtConst {
   String HEADER = "Authorization";
 
   String TOKEN_PREFIX = "Bearer ";
+
+  String REFRESH_TOKEN_CACHE_KEY_PREFIX = "token:";
 }

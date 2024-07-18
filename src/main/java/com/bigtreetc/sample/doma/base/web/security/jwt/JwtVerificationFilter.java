@@ -25,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.GenericFilterBean;
@@ -50,17 +49,6 @@ public class JwtVerificationFilter extends GenericFilterBean {
     this.algorithm = Algorithm.HMAC512(signingKey);
   }
 
-  /**
-   * コンストラクタ
-   *
-   * @param signingKey
-   * @param pathPattern
-   */
-  public JwtVerificationFilter(String signingKey, String pathPattern) {
-    this.algorithm = Algorithm.HMAC512(signingKey);
-    this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(pathPattern));
-  }
-
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
       throws IOException, ServletException {
@@ -74,12 +62,12 @@ public class JwtVerificationFilter extends GenericFilterBean {
 
     try {
       val tokenPayload = request.getHeader(JwtConst.HEADER);
-      val accessToken = tokenPayload.substring(7);
+      val accessToken = extractAccessToken(tokenPayload);
       val verifier = JWT.require(algorithm).build();
       val jwt = verifier.verify(accessToken);
 
       val username = jwt.getClaim(JwtConst.USERNAME).asString();
-      if (username == null || "".equals(username)) {
+      if (username == null || username.isEmpty()) {
         String msg = String.format("username=%s", username);
         throw new JWTVerificationException(msg);
       }
@@ -109,8 +97,15 @@ public class JwtVerificationFilter extends GenericFilterBean {
     }
   }
 
-  protected boolean requiresAuthentication(
-      HttpServletRequest request, HttpServletResponse response) {
+  private static String extractAccessToken(String tokenPayload) {
+    try {
+      return tokenPayload.substring(7);
+    } catch (Exception e) {
+      return tokenPayload;
+    }
+  }
+
+  private boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
     val tokenPayload = request.getHeader(JwtConst.HEADER);
     if (tokenPayload == null || !tokenPayload.startsWith(JwtConst.TOKEN_PREFIX)) {
       return false;

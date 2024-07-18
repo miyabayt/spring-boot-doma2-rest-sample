@@ -69,6 +69,7 @@ springdoc:
 application:
   security:
     permittedUrls:
+      - "/api/auth/login"
       - "/api/auth/refresh"
       - "/actuator/health"
       - "/swagger-ui/**"
