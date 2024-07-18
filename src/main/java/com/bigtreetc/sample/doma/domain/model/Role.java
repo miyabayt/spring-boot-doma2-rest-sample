@@ -16,8 +16,6 @@ import org.seasar.doma.*;
 @Setter
 public class Role extends BaseEntityImpl {
 
-  private static final long serialVersionUID = 4825745231712286767L;
-
   @JsonIgnore @OriginalStates // 差分UPDATEのために定義する
   Role originalStates;
 

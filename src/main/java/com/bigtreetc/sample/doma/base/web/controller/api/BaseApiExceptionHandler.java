@@ -43,23 +43,22 @@ public class BaseApiExceptionHandler extends ResponseEntityExceptionHandler {
     val fieldErrorContexts = new ArrayList<FieldErrorDto>();
 
     if (ex instanceof ValidationErrorException vee) {
-      vee.getErrors()
-          .ifPresent(
-              errors -> {
-                val fieldErrors = errors.getFieldErrors();
-                for (val fieldError : fieldErrors) {
-                  val fieldName = fieldError.getField();
-                  val rejectedValue = fieldError.getRejectedValue();
+      val errors = vee.getErrors();
+      if (errors != null) {
+        val fieldErrors = errors.getFieldErrors();
+        for (val fieldError : fieldErrors) {
+          val fieldName = fieldError.getField();
+          val rejectedValue = fieldError.getRejectedValue();
 
-                  val fieldErrorResource = new FieldErrorDto();
-                  fieldErrorResource.setFieldName(fieldName);
-                  fieldErrorResource.setRejectedValue(rejectedValue);
+          val fieldErrorResource = new FieldErrorDto();
+          fieldErrorResource.setFieldName(fieldName);
+          fieldErrorResource.setRejectedValue(rejectedValue);
 
-                  val errorMessage = MessageUtils.getMessage(fieldError);
-                  fieldErrorResource.setErrorMessage(errorMessage);
-                  fieldErrorContexts.add(fieldErrorResource);
-                }
-              });
+          val errorMessage = MessageUtils.getMessage(fieldError);
+          fieldErrorResource.setErrorMessage(errorMessage);
+          fieldErrorContexts.add(fieldErrorResource);
+        }
+      }
     }
 
     val locale = request.getLocale();
