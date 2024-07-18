@@ -54,7 +54,9 @@ public class UserDetailServiceImpl implements UserDetailsService {
                       new UsernameNotFoundException("no staff found [username=" + username + "]"));
 
       // 担当者権限を取得する
-      val staffRoles = staffRoleDao.selectByStaffId(staff.getId(), toList());
+      val staffRoleCriteria = new StaffRoleCriteria();
+      staffRoleCriteria.setStaffId(staff.getId());
+      val staffRoles = staffRoleDao.selectAll(staffRoleCriteria, SelectOptions.get(), toList());
 
       // ロールコードにプレフィックスをつけてまとめる
       val roleCodes = staffRoles.stream().map(StaffRole::getRoleCode).collect(toSet());

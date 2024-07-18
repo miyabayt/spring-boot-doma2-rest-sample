@@ -15,28 +15,15 @@ public interface StaffRoleDao {
   /**
    * 担当者権限を検索します。
    *
-   * @param staffCriteria
-   * @param permissionCriteria
+   * @param staffRoleCriteria
    * @param options
    * @return
    */
   @Select(strategy = SelectType.COLLECT)
   <R> R selectAll(
-      final StaffCriteria staffCriteria,
-      final PermissionCriteria permissionCriteria,
+      final StaffRoleCriteria staffRoleCriteria,
       final SelectOptions options,
       final Collector<StaffRole, ?, R> collector);
-
-  /**
-   * 担当者権限を検索します。
-   *
-   * @param id
-   * @param collector
-   * @param <R>
-   * @return
-   */
-  @Select(strategy = SelectType.COLLECT)
-  <R> R selectByStaffId(Long id, final Collector<StaffRole, ?, R> collector);
 
   /**
    * 担当者権限を1件取得します。
@@ -45,7 +32,7 @@ public interface StaffRoleDao {
    * @return
    */
   @Select
-  Optional<Permission> selectById(Long id);
+  Optional<StaffRole> selectById(Long id);
 
   /**
    * 担当者権限を1件取得します。
@@ -54,7 +41,7 @@ public interface StaffRoleDao {
    * @return
    */
   @Select
-  Optional<Permission> select(PermissionCriteria criteria);
+  Optional<StaffRole> select(PermissionCriteria criteria);
 
   /**
    * 担当者権限を登録します。
