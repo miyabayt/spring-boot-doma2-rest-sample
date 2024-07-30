@@ -8,6 +8,4 @@ import lombok.Setter;
 public class JwtObject {
 
   String accessToken;
-
-  String refreshToken;
 }
