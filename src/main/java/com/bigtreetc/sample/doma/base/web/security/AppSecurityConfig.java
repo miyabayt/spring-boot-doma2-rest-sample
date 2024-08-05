@@ -32,6 +32,7 @@ public class AppSecurityConfig {
   @Setter
   @Getter
   public static class RefreshTokenConfig {
-    private int timeoutHours = 2;
+    private String signingKey;
+    private int timeoutMinutes = 60;
   }
 }

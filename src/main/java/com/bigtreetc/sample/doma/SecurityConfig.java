@@ -101,15 +101,18 @@ public class SecurityConfig {
   public JwtRepository jwtRepository() {
     val jwtConfig = securityConfig.getJwt();
     val accessTokenConfig = jwtConfig.getAccessToken();
-    val signingKey = accessTokenConfig.getSigningKey();
-    val expiresIn = accessTokenConfig.getExpiredIn();
+    val accessTokenSigningKey = accessTokenConfig.getSigningKey();
+    val accessTokenExpiresIn = accessTokenConfig.getExpiredIn();
     val refreshTokenConfig = jwtConfig.getRefreshToken();
-    val timeoutHours = refreshTokenConfig.getTimeoutHours();
+    val refreshTokenSigningKey = refreshTokenConfig.getSigningKey();
+    val timeoutMinutes = refreshTokenConfig.getTimeoutMinutes();
+
     val repository = new JwtRepository();
     repository.setRedisTemplate(redisTemplate());
-    repository.setSigningKey(signingKey);
-    repository.setExpiresIn(expiresIn);
-    repository.setRefreshTokenTimeoutHours(timeoutHours);
+    repository.setAccessTokenSigningKey(accessTokenSigningKey);
+    repository.setAccessTokenExpiresIn(accessTokenExpiresIn);
+    repository.setRefreshTokenSigningKey(refreshTokenSigningKey);
+    repository.setRefreshTokenExpiresIn(timeoutMinutes * 60L * 1000);
     return repository;
   }
 
@@ -126,8 +129,10 @@ public class SecurityConfig {
 
   @Bean
   public JwtRefreshFilter jwtRefreshFilter() {
+    val jwtConfig = securityConfig.getJwt();
+    val signingKey = jwtConfig.getRefreshToken().getSigningKey();
     val matcher = new AntPathRequestMatcher("/api/auth/refresh", "POST");
-    val filter = new JwtRefreshFilter();
+    val filter = new JwtRefreshFilter(signingKey);
     filter.setRepository(jwtRepository());
     filter.setRequiresAuthenticationRequestMatcher(matcher);
     return filter;

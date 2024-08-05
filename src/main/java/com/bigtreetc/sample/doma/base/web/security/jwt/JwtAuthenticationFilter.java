@@ -116,7 +116,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             .build();
 
     // リフレッシュトークンを払い出し、Cookieにセットする
-    val refreshToken = repository.createRefreshToken(sessionIdKey);
+    val refreshToken = repository.createRefreshToken(sessionIdKey, username, authorities);
     val refreshTokenCookie =
         ResponseCookie.from(COOKIE_REFRESH_TOKEN, refreshToken)
             .sameSite(COOKIE_SAME_SITE_STRICT)

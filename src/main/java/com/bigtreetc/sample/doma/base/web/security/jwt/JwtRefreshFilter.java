@@ -4,6 +4,7 @@ import static com.bigtreetc.sample.doma.base.web.BaseWebConst.*;
 import static com.bigtreetc.sample.doma.base.web.security.jwt.JwtConst.REFRESH_TOKEN_CACHE_KEY_PREFIX;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.bigtreetc.sample.doma.base.util.EnvironmentUtils;
 import com.bigtreetc.sample.doma.base.util.MessageUtils;
 import com.bigtreetc.sample.doma.base.web.controller.api.response.ErrorApiResponseImpl;
@@ -42,9 +43,20 @@ public class JwtRefreshFilter extends GenericFilterBean {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  private final Algorithm algorithm;
+
   private RequestMatcher requiresAuthenticationRequestMatcher = AnyRequestMatcher.INSTANCE;
 
   private JwtRepository repository;
+
+  /**
+   * コンストラクタ
+   *
+   * @param signingKey
+   */
+  public JwtRefreshFilter(String signingKey) {
+    this.algorithm = Algorithm.HMAC512(signingKey);
+  }
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -59,17 +71,16 @@ public class JwtRefreshFilter extends GenericFilterBean {
 
     Object resource = null;
     try {
-      val tokenPayload = request.getHeader(JwtConst.HEADER);
-      val accessToken = extractAccessToken(tokenPayload);
-      val jwt = JWT.decode(accessToken);
-
-      val username = jwt.getClaim(JwtConst.USERNAME).asString();
-      val authorities = jwt.getClaim(JwtConst.ROLES).asList(String.class);
-
       // Cookieで送信されたリフレッシュトークン
       val refreshToken =
           getCookieValue(request, COOKIE_REFRESH_TOKEN)
               .orElseThrow(() -> new InsufficientAuthenticationException("リフレッシュトークンがNULLです。"));
+
+      // ログインIDを取り出す
+      val verifier = JWT.require(algorithm).build();
+      val jwt = verifier.verify(refreshToken);
+      val username = jwt.getClaim(JwtConst.USERNAME).asString();
+      val authorities = jwt.getClaim(JwtConst.ROLES).asList(String.class);
 
       // Cookieで送信されたセッションID
       val sessionId =
@@ -98,7 +109,7 @@ public class JwtRefreshFilter extends GenericFilterBean {
               .build();
 
       // リフレッシュトークンを更新する
-      val newRefreshToken = repository.renewRefreshToken(sessionIdKey);
+      val newRefreshToken = repository.createRefreshToken(sessionIdKey, username, authorities);
       val refreshTokenCookie =
           ResponseCookie.from(COOKIE_REFRESH_TOKEN, newRefreshToken)
               .sameSite(COOKIE_SAME_SITE_STRICT)

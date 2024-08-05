@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Getter
@@ -21,13 +20,15 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @Slf4j
 public class JwtRepository {
 
-  private String signingKey;
+  private String accessTokenSigningKey;
 
-  private long expiresIn;
+  private long accessTokenExpiresIn;
+
+  private String refreshTokenSigningKey;
+
+  private long refreshTokenExpiresIn;
 
   private StringRedisTemplate redisTemplate;
-
-  private int refreshTokenTimeoutHours;
 
   /**
    * アクセストークンを返します。
@@ -39,7 +40,7 @@ public class JwtRepository {
   public String createAccessToken(String username, List<String> authorities) {
     Date issuedAt = new Date();
     Date notBefore = new Date(issuedAt.getTime());
-    Date expiresAt = new Date(issuedAt.getTime() + expiresIn);
+    Date expiresAt = new Date(issuedAt.getTime() + accessTokenExpiresIn);
 
     return JWT.create()
         .withIssuedAt(issuedAt)
@@ -47,7 +48,7 @@ public class JwtRepository {
         .withExpiresAt(expiresAt)
         .withClaim(JwtConst.USERNAME, username)
         .withArrayClaim(JwtConst.ROLES, authorities.toArray(new String[0]))
-        .sign(Algorithm.HMAC512(signingKey));
+        .sign(Algorithm.HMAC512(accessTokenSigningKey));
   }
 
   /**
@@ -56,13 +57,29 @@ public class JwtRepository {
    * @param key
    * @return
    */
-  public String createRefreshToken(String key) {
-    val refreshToken = RandomStringUtils.randomAlphanumeric(256);
+  public String createRefreshToken(String key, String username, List<String> authorities) {
+    Date issuedAt = new Date();
+    Date notBefore = new Date(issuedAt.getTime());
+    Date expiresAt = new Date(issuedAt.getTime() + refreshTokenExpiresIn);
+
+    val refreshToken =
+        JWT.create()
+            .withIssuedAt(issuedAt)
+            .withNotBefore(notBefore)
+            .withExpiresAt(expiresAt)
+            .withClaim(JwtConst.USERNAME, username)
+            .withArrayClaim(JwtConst.ROLES, authorities.toArray(new String[0]))
+            .sign(Algorithm.HMAC512(refreshTokenSigningKey));
+
     redisTemplate.opsForValue().set(key, refreshToken);
-    redisTemplate.expire(key, refreshTokenTimeoutHours, TimeUnit.HOURS);
+    redisTemplate.expire(key, refreshTokenExpiresIn, TimeUnit.MILLISECONDS);
 
     if (log.isDebugEnabled()) {
-      log.debug("refresh token has stored. [key={}, refreshToken={}]", key, refreshToken);
+      log.debug(
+          "refresh token has stored. [key={}, refreshToken={}, expire={}]",
+          key,
+          refreshToken,
+          refreshTokenExpiresIn);
     }
 
     return refreshToken;
@@ -83,25 +100,6 @@ public class JwtRepository {
     }
 
     return true;
-  }
-
-  /**
-   * リフレッシュトークンを再発行します。
-   *
-   * @param key
-   * @return
-   */
-  public String renewRefreshToken(String key) {
-    val newRefreshToken = RandomStringUtils.randomAlphanumeric(256);
-
-    redisTemplate.opsForValue().set(key, newRefreshToken);
-    redisTemplate.expire(key, refreshTokenTimeoutHours, TimeUnit.HOURS);
-
-    if (log.isDebugEnabled()) {
-      log.debug("refresh token has renewed. [key={}, refreshToken={}]", key, newRefreshToken);
-    }
-
-    return newRefreshToken;
   }
 
   /**
